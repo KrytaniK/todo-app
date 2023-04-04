@@ -1,0 +1,119 @@
+:root {
+  font-family: 'Open Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-size: 16px;
+  background-color: #F2F6FE;
+
+  --border-radius: 8px;
+  --color-primary: #0052E7;
+  --color-secondary: #27DEEA;
+  --color-compliment: #EA6D27;
+  --color-error: #EB002A;
+  --color-success: #1DBA53;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+h5 {
+  font-size: .875rem;
+  line-height: 1.125rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+p {
+  font-size: .875rem;
+  font-weight: 600;
+  color: rgba(0,0,0, .5);
+}
+
+p.small {
+  font-size: .75rem;
+  color: rgba(0, 0, 0, .5);
+}
+
+button {
+  background: none;
+  border: none;
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input {
+  background: none;
+  border: none;
+  border-radius: var(--border-radius);
+}
+
+input:focus {
+  border: none;
+  outline: none;
+}
+
+ol, ul {
+  margin: 0;
+}
+
+#root {
+  height: 100%;
+}
+
+.app-content {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
