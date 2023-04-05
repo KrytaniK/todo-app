@@ -1,0 +1,75 @@
+#sidebar {
+    min-width: 256px;
+    width: 256px;
+    height: 100%;
+    padding-bottom: 32px;
+    align-items: center;
+    background-color: #1f1f1f;
+    color: white;
+    box-sizing: border-box;
+}
+
+.app-name {
+    padding: 32px 0;
+}
+
+.nav-links {
+    padding: 16px 0;
+    width: 100%;
+    flex-grow: 1;
+    gap: 8px;
+}
+
+/* Navigation Category Styling */
+
+.nav-links-category {
+    padding: 0 16px;
+}
+
+.nav-links-category {
+    gap: 8px;
+}
+
+.nav-links-category h6 {
+    opacity: 50%;
+}
+
+/* Nav Link Styling */
+
+.nav-links-category-item {
+    padding: 8px 16px;
+    gap: 16px;
+    align-items: center;
+    border-radius: var(--border-radius);
+}
+
+.nav-links-category-item h4{
+    flex: 1;
+}
+
+.nav-links-category-item:hover {
+    background-color: #272727;
+}
+
+/* New Project Button Styling */
+
+.add-project {
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    background-color: #272727;
+    border: 1px solid #3f3f3f;
+    align-items: center;
+    gap: 8px;
+}
+
+#newProjectNameInput {
+    min-width: 1px;
+    opacity: 50%;
+    border-bottom: 1px solid white;
+    padding-bottom: 8px;
+    flex: 1;
+}
+
+#newProjectNameInput:focus {
+    opacity: 100%;
+}

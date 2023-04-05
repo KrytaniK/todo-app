@@ -39,7 +39,7 @@ export default class Database {
 
             this.dbDriver.getConnection(this.dbName).then(connection => {
                 const transaction = connection.transaction([this.currentObjectStoreName], 'readonly');
-                transaction.oncomplete = (event) => connection.close();
+                transaction.oncomplete = () => connection.close();
                 transaction.onerror = (event) => {
                     connection.close();
                     reject(event.target.error);
@@ -60,7 +60,7 @@ export default class Database {
 
             this.dbDriver.getConnection(this.dbName).then(connection => {
                 const transaction = connection.transaction([this.currentObjectStoreName], 'readonly');
-                transaction.oncomplete = event => connection.close();
+                transaction.oncomplete = () => connection.close();
                 transaction.onerror = (event) => {
                     connection.close();
                     reject(event.target.error);
@@ -82,7 +82,7 @@ export default class Database {
             this.dbDriver.getConnection(this.dbName).then(connection => {
 
                 const transaction = connection.transaction([this.currentObjectStoreName], 'readwrite');
-                transaction.oncomplete = (event) => connection.close();
+                transaction.oncomplete = () => connection.close();
                 transaction.onerror = (event) => {
                     connection.close();
                     reject(event.target.error);

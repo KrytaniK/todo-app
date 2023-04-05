@@ -4,7 +4,7 @@
   font-size: 16px;
   background-color: #F2F6FE;
 
-  --border-radius: 8px;
+  --border-radius: 4px;
   --color-primary: #0052E7;
   --color-secondary: #27DEEA;
   --color-compliment: #EA6D27;
@@ -18,6 +18,7 @@ html {
 
 body {
   min-height: 100%;
+  height: 100%;
   margin: 0;
 }
 
@@ -73,6 +74,7 @@ button {
   font-size: inherit;
   cursor: pointer;
   padding: 0;
+  color: inherit;
 }
 
 a {
@@ -83,7 +85,9 @@ a {
 input {
   background: none;
   border: none;
-  border-radius: var(--border-radius);
+  margin: 0;
+  padding: 0;
+  color: inherit;
 }
 
 input:focus {
@@ -93,6 +97,10 @@ input:focus {
 
 ol, ul {
   margin: 0;
+}
+
+main {
+  height: 100%;
 }
 
 #root {
