@@ -30,8 +30,12 @@
     gap: 8px;
 }
 
-.nav-links-category h6 {
+.nav-links-category-name {
     opacity: 50%;
+}
+
+.nav-links-category-items {
+    padding: 8px 0;
 }
 
 /* Nav Link Styling */
@@ -65,8 +69,6 @@
 #newProjectNameInput {
     min-width: 1px;
     opacity: 50%;
-    border-bottom: 1px solid white;
-    padding-bottom: 8px;
     flex: 1;
 }
 

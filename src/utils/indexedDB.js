@@ -129,7 +129,7 @@ export default class Database {
         });
     }
 
-    delete = (itemID) => {
+    remove = (itemID) => {
         return new Promise((resolve, reject) => {
             if (!this.currentObjectStoreName) {
                 reject("No Object Store Specified! Please ensure you use db.store().delete() if you wish to delete an entry");

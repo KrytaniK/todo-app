@@ -1,0 +1,14 @@
+.context-menu {
+    position: absolute;
+    background-color: #1f1f1f;
+    border-radius: var(--border-radius);
+    border: 1px solid #3f3f3f;
+}
+
+.context-menu-item {
+    padding: 8px 16px;
+}
+
+.context-menu-item:hover {
+    background-color: #2f2f2f;
+}
