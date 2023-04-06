@@ -2,7 +2,6 @@
   font-family: 'Open Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-size: 16px;
-  background-color: #F2F6FE;
 
   --border-radius: 4px;
   --color-primary: #0052E7;
@@ -20,6 +19,8 @@ body {
   min-height: 100%;
   height: 100%;
   margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -58,12 +59,12 @@ h6 {
 p {
   font-size: .875rem;
   font-weight: 600;
-  color: rgba(0,0,0, .5);
+  color: var(--color-text);
 }
 
 p.small {
   font-size: .75rem;
-  color: rgba(0, 0, 0, .5);
+  color: var(--color-text);
 }
 
 button {
@@ -95,6 +96,21 @@ input:focus {
   outline: none;
 }
 
+::placeholder {
+  color: var(--color-text);
+  opacity: 50%;
+}
+
+::-moz-placeholder {
+  color: var(--color-text);
+  opacity: 50%;
+}
+
+::-webkit-input-placeholder {
+  color: var(--color-text);
+  opacity: 50%;
+}
+
 ol, ul {
   margin: 0;
 }
@@ -124,4 +140,18 @@ main {
 .flex-column {
   display: flex;
   flex-direction: column;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #272727;
+    --color-text: #FFF;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-background: #FFF;
+    --color-text: #000;
+  }
 }

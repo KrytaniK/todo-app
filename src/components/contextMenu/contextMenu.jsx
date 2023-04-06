@@ -46,7 +46,7 @@ const C_ContextMenu = ({ children, options }) => {
     return <div onContextMenu={onOpenContextMenu} ref={menuContext}>
         {children}
         {
-            isOpen && options?.length !== 0 && <div className="context-menu" style={{ left: pos.x, top: pos.y}}>
+            isOpen && options?.length !== 0 && <div className="context-menu flex-column" style={{ left: pos.x, top: pos.y}}>
                 {
                     options.map(({ id, color, title, callback }) => {
                         return <button style={{color: color}} className="context-menu-item" key={id} onClick={(e) => { onMenuItemClicked(e, callback); }}>

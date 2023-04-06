@@ -7,8 +7,12 @@
 
 .context-menu-item {
     padding: 8px 16px;
+    width: 100%;
+    text-align: start;
+    opacity: 60%;
 }
 
 .context-menu-item:hover {
     background-color: #2f2f2f;
+    opacity: 100%;
 }
