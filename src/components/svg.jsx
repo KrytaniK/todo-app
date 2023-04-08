@@ -2,7 +2,7 @@ import React from "react";
 
 const C_SVG = ({ className, sourceURL, color, size }) => {
 
-    if (!sourceURL) return null;
+    if (!sourceURL || sourceURL.length < 1) return null;
 
     return <div
         className={`${className || ""} svg`}

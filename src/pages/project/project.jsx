@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLoaderData } from "react-router-dom";
-import { C_ProjectList, C_ProjectBoard } from '../../components';
+import { C_ProjectList, C_ProjectBoard, C_SVG } from '../../components';
 import './project.css';
 
 const P_Project = () => {
@@ -9,8 +9,38 @@ const P_Project = () => {
 
     const { project } = useLoaderData();
 
+    const onProjectSearch = (event) => {
+
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        const data = Object.fromEntries(formData.entries());
+
+        const searchQuery = data["searchQuery"];
+
+        console.log(`Querying for "${searchQuery}"`);
+    }
+
     return <div className="project-wrapper flex-column">
-        <section className="project-header"></section>
+        <section className="project-header flex-row">
+            <div className="project-name flex">
+                <h1>{project.name}</h1>
+            </div>
+            <div className="project-tabs flex-row">
+                <button className={`project-tab ${view === "List" ? "selected" : ""}`} onClick={() => { setView('List'); }}>
+                    List
+                </button>
+                <button className={`project-tab ${view === "Board" ? "selected" : ""}`}  onClick={() => { setView('Board'); }}>
+                    Board
+                </button>
+            </div>
+            <div className="project-search flex">
+                <form action="/" className="project-searchbar flex-row" onSubmit={onProjectSearch}>
+                    <C_SVG sourceURL="/search.svg" size="1rem" color="var(--color-text)" />
+                    <input type="text" name="searchQuery" placeholder={`Search in ${project.name}`} />
+                </form>
+            </div>
+        </section>
         { view === 'List' && <C_ProjectList statuses={project.statuses}/> }
         { view === 'Board' && <C_ProjectBoard statuses={project.statuses}/> }
     </div>;

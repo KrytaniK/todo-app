@@ -28,9 +28,11 @@ const C_Sidebar = ({ projects }) => {
         const formData = new FormData(event.currentTarget);
         const data = Object.fromEntries(formData.entries());
 
+        const newName = data["newProjectName"] || "New Project";
+
         const newProject = {
             id: Math.floor(Math.random() * 1000),
-            name: data["newProjectName"]
+            name: newName
         }
 
         db.add('projects', newProject);
@@ -49,6 +51,11 @@ const C_Sidebar = ({ projects }) => {
         const data = Object.fromEntries(formData.entries());
 
         const newName = data["newProjectName"];
+
+        if (newName.length === 0) {
+            setRenameIndex(-1);
+            return;
+        }
 
         const newProject = { ...project, name: newName };
 
