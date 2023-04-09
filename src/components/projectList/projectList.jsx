@@ -11,6 +11,7 @@ const C_ProjectList = ({ project }) => {
     const db = useIndexedDB();
 
     const onAddTask = (taskID) => {
+
         const newProject = {
             ...project,
             tasks: [...taskIDs, taskID]

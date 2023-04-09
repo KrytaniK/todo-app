@@ -4,16 +4,24 @@
     border-radius: var(--border-radius);
     border: 1px solid #3f3f3f;
     z-index: 1000;
+    min-width: max-content;
 }
 
-.context-menu-item {
+.submenu-container {
+    position: relative;
+    height: 100%;
+    width: 1px;
+}
+
+.menu-item {
     padding: 8px 16px;
-    width: 100%;
-    text-align: start;
+    flex: 1;
     opacity: 60%;
+    justify-content: space-between;
 }
 
-.context-menu-item:hover {
+.menu-item:hover {
     background-color: #2f2f2f;
     opacity: 100%;
+    cursor: pointer;
 }

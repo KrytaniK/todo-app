@@ -48,19 +48,61 @@ const C_ContextMenu = ({ children, options }) => {
         {
             isOpen && options?.length !== 0 && <div className="context-menu flex-column" style={{ left: pos.x, top: pos.y}}>
                 {
-                    options.map(({ id, color, title, callback }) => {
-                        return <button
-                            key={id}
-                            style={{ color: color }}
-                            className="context-menu-item"
-                            onClick={(e) => { onMenuItemClicked(e, callback); }}>
-                            <h6>{title}</h6>
-                        </button>
+                    options.map((option) => {
+                        return <C_Menu_Item key={option.id} option={option}/>
                     })
                 }
             </div>
         }
     </div>;
+}
+
+const C_Menu = ({options, isOpen, position}) => {
+    return isOpen && options?.length !== 0 && <div className="context-menu flex-column" style={{left: position.x, top: position.y}}>
+        { options.map((option) => <C_Menu_Item key={option.id} option={option}/> )}
+    </div>
+}
+
+const C_Menu_Item = ({ option, close }) => {
+
+    const [showMenu, setShowMenu] = useState(false);
+
+    const onItemClick = (event, callback) => {
+        event.stopPropagation();
+
+        if (callback)
+            callback();
+        
+        close();
+    }
+
+    const onOpenSubmenu = (event) => {
+        event.stopPropagation();
+        console.log("sub Options menu trigger Clicked")
+    }
+
+    const handleMouseEnter = (event) => {
+        setShowMenu(true);
+    }
+
+    const handleMouseLeave = (event) => {
+        setShowMenu(false);
+    }
+
+    return <div
+        className="menu-item flex-row"
+        onClick={option.options ? onOpenSubmenu : onItemClick}
+        style={{color: option.color}}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+    >
+        <h6>{option.title}</h6>
+        <div className="submenu-container">
+            {
+                option.options && showMenu && <C_Menu options={option.options} isOpen={showMenu} position={{x: '100%', y: '-100%'}} />
+            }
+        </div>
+    </div>
 }
 
 export default C_ContextMenu;

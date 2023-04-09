@@ -35,7 +35,41 @@ const C_List_Task = ({ task, status, onRenameTask, onSelect, onDeselect, onMoveT
                 id: 'moveTo',
                 title: 'Move To',
                 color: 'var(--color-text)',
-                callback: () => { console.log("Moving Task"); }
+                options: [
+                    {
+                        id: 'moveTo-Project',
+                        title: 'Project',
+                        color: 'var(--color-text)',
+                        options: [
+
+                        ]
+                    },
+                    {
+                        id: 'moveTo-Status',
+                        title: 'Status',
+                        color: 'var(--color-text)',
+                        options: [
+                            {
+                                id: 'moveTo-Waiting',
+                                title: 'Waiting',
+                                color: 'var(--color-text)',
+                                callback: () => { onMoveTask(task, status); }
+                            },
+                            {
+                                id: 'moveTo-InProgress',
+                                title: 'In Progress',
+                                color: 'var(--color-text)',
+                                callback: () => { onMoveTask(task, status); }
+                            },
+                            {
+                                id: 'moveTo-Done',
+                                title: 'Done',
+                                color: 'var(--color-text)',
+                                callback: () => { onMoveTask(task, status); }
+                            },
+                        ]
+                    },
+                ]
             },
             {
                 id: 'delete',
