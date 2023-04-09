@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { C_SVG, C_ContextMenu } from '../';
 import { Project } from "../../utils/schemas";
 import { useIndexedDB } from "../../hooks";
@@ -10,8 +10,20 @@ const C_Sidebar = ({ projects, currentProject }) => {
     const [addingNewProject, setAddingNewProject] = useState(false);
     const [renameIndex, setRenameIndex] = useState(-1);
     const [projectList, setProjectList] = useState([...projects]);
-    const [selectedProject, setSelectedProject] = useState(undefined);
+    const [selectedProject, setSelectedProject] = useState(currentProject);
     const db = useIndexedDB();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!currentProject) {
+            setSelectedProject(projects[0].id);
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('lastViewedProject', selectedProject);
+        navigate(`/projects/${selectedProject}`);
+    }, [selectedProject]);
 
     const onCreateProject = (event) => {
         event.preventDefault();
@@ -27,13 +39,16 @@ const C_Sidebar = ({ projects, currentProject }) => {
                 statuses: statuses.filter(status => status.isTemplate)
             });
 
-            db.add('projects', newProject);
+            db.add('projects', newProject).then(() => {
+                setProjectList([
+                    ...projectList,
+                    newProject
+                ]);
+                setAddingNewProject(false);
+                setSelectedProject(newProject.id);
+                navigate(`/projects/${newProject.id}`);
+            });
 
-            setProjectList([
-                ...projectList,
-                newProject
-            ]);
-            setAddingNewProject(false);
         })
     }
 
@@ -110,7 +125,7 @@ const C_Sidebar = ({ projects, currentProject }) => {
                             
                             return <C_ContextMenu key={project.id} options={projectLinkOptions(project.id, index)}>
                                 <Link
-                                    className={`nav-links-category-item flex-row ${selectedProject === project.id || currentProject === project.id ? 'selected' : ''}`}
+                                    className={`nav-links-category-item flex-row ${selectedProject === project.id ? 'selected' : ''}`}
                                     to={`/projects/${project.id}`}
                                     onClick={() => { setSelectedProject(project.id); }}
                                 >

@@ -45,41 +45,19 @@ const C_ContextMenu = ({ children, options }) => {
 
     return <div onContextMenu={onOpenContextMenu} ref={menuContext}>
         {children}
-        {
-            isOpen && options?.length !== 0 && <div className="context-menu flex-column" style={{ left: pos.x, top: pos.y}}>
-                {
-                    options.map((option) => {
-                        return <C_Menu_Item key={option.id} option={option}/>
-                    })
-                }
-            </div>
-        }
+        <C_Menu isOpen={isOpen} onItemClicked={onMenuItemClicked} options={options} position={pos}/>
     </div>;
 }
 
-const C_Menu = ({options, isOpen, position}) => {
+const C_Menu = ({options, isOpen, onItemClicked, position}) => {
     return isOpen && options?.length !== 0 && <div className="context-menu flex-column" style={{left: position.x, top: position.y}}>
-        { options.map((option) => <C_Menu_Item key={option.id} option={option}/> )}
+        {options.map((option) => <C_Menu_Item key={option.id} option={option} onClick={onItemClicked} /> )}
     </div>
 }
 
-const C_Menu_Item = ({ option, close }) => {
+const C_Menu_Item = ({ option, onClick }) => {
 
     const [showMenu, setShowMenu] = useState(false);
-
-    const onItemClick = (event, callback) => {
-        event.stopPropagation();
-
-        if (callback)
-            callback();
-        
-        close();
-    }
-
-    const onOpenSubmenu = (event) => {
-        event.stopPropagation();
-        console.log("sub Options menu trigger Clicked")
-    }
 
     const handleMouseEnter = (event) => {
         setShowMenu(true);
@@ -91,7 +69,7 @@ const C_Menu_Item = ({ option, close }) => {
 
     return <div
         className="menu-item flex-row"
-        onClick={option.options ? onOpenSubmenu : onItemClick}
+        onClick={(e) => {onClick(e, option.callback)}}
         style={{color: option.color}}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -99,7 +77,7 @@ const C_Menu_Item = ({ option, close }) => {
         <h6>{option.title}</h6>
         <div className="submenu-container">
             {
-                option.options && showMenu && <C_Menu options={option.options} isOpen={showMenu} position={{x: '100%', y: '-100%'}} />
+                option.options && showMenu && <C_Menu options={option.options} onItemClicked={onClick} isOpen={showMenu} position={{x: '100%', y: '-100%'}} />
             }
         </div>
     </div>

@@ -30,3 +30,16 @@ export class Task {
         this.dueDate = options.dueDate || 'unscheduled';
     }
 }
+
+export class ContextMenuItem {
+    constructor(options = { title: undefined, color: undefined, subOptions: [], callback: () => { } }) {
+
+        const {title, color, subOptions, callback} = options;
+
+        this.id = short.generate();
+        this.title = title;
+        this.color = color;
+        this.options = subOptions;
+        this.callback = callback;
+    }
+}

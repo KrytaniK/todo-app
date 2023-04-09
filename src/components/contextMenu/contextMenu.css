@@ -18,6 +18,7 @@
     flex: 1;
     opacity: 60%;
     justify-content: space-between;
+    min-width: 4rem;
 }
 
 .menu-item:hover {

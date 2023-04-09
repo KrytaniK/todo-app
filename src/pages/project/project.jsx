@@ -2,47 +2,51 @@ import React, { useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { C_ProjectList, C_ProjectBoard, C_SVG } from '../../components';
 import './project.css';
+import { useIndexedDB, useProject } from "../../hooks";
 
 const P_Project = () => {
 
     const [view, setView] = useState('List');
 
-    const { project } = useLoaderData();
+    const { projectID } = useLoaderData();
 
-    const onProjectSearch = (event) => {
+    const db = useIndexedDB();
+    const {project, taskList, taskActions} = useProject(projectID, db);
 
-        event.preventDefault();
+    // const onProjectSearch = (event) => {
 
-        const formData = new FormData(event.currentTarget);
-        const data = Object.fromEntries(formData.entries());
+    //     event.preventDefault();
 
-        const searchQuery = data["searchQuery"];
+    //     const formData = new FormData(event.currentTarget);
+    //     const data = Object.fromEntries(formData.entries());
 
-        console.log(`Querying for "${searchQuery}"`);
-    }
+    //     const searchQuery = data["searchQuery"];
 
-    return <div className="project-wrapper flex-column">
+    //     console.log(`Querying for "${searchQuery}"`);
+    // }
+
+    return project && <div className="project-wrapper flex-column">
         <section className="project-header flex-row">
             <div className="project-name flex">
                 <h1>{project.name}</h1>
             </div>
             <div className="project-tabs flex-row">
                 <button className={`project-tab ${view === "List" ? "selected" : ""}`} onClick={() => { setView('List'); }}>
-                    List
+                    <p>List View</p>
                 </button>
-                <button className={`project-tab ${view === "Board" ? "selected" : ""}`}  onClick={() => { setView('Board'); }}>
+                {/* <button className={`project-tab ${view === "Board" ? "selected" : ""}`}  onClick={() => { setView('Board'); }}>
                     Board
-                </button>
+                </button> */}
             </div>
-            <div className="project-search flex">
+            {/* <div className="project-search flex">
                 <form className="project-searchbar flex-row" onSubmit={onProjectSearch}>
                     <C_SVG sourceURL="/search.svg" size="1rem" color="var(--color-text)" />
-                    <input type="text" name="searchQuery" placeholder={`Search in ${project.name}`} aria-label="Project Search Bar"/>
+                    <input type="text" name="searchQuery" placeholder={`Search in ${_project.name}`} aria-label="Project Search Bar"/>
                 </form>
-            </div>
+            </div> */}
         </section>
-        {view === 'List' && <C_ProjectList project={project} /> }
-        {view === 'Board' && <C_ProjectBoard project={project} /> }
+        {view === 'List' && <C_ProjectList statuses={project.statuses} taskList={taskList} taskActions={taskActions} /> }
+        {/* {view === 'Board' && <C_ProjectBoard statuses={_project.statuses} taskList={project.taskList} taskActions={project.taskActions} /> } */}
     </div>;
 }
 

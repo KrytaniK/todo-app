@@ -1,78 +1,63 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { C_SVG } from "../";
 import C_List_NewTaskForm from "./newTaskForm";
-import { Task } from "../../utils/schemas";
-import { useIndexedDB } from "../../hooks";
+import { Task, ContextMenuItem } from "../../utils/schemas";
+import { useIndexedDB, useStatus } from "../../hooks";
 import C_List_Task from "./listTask";
+import { getDataFromForm } from "../../utils/util";
 
-const C_List_Status = ({ status, tasks, onAddTask, onSelectTask, onDeselectTask, onMoveTask, onDeleteTask }) => {
+const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskActions }) => {
+
+    const { selectTask, deselectTask } = taskActions;
 
     const [addingTask, setAddingTask] = useState(false);
-    const [taskList, setTaskList] = useState([]);
+    const [renameIndex, setRenameIndex] = useState(-1);
+
     const db = useIndexedDB();
-
-    useEffect(() => {
-
-        const getTasks = async () => {
-            let result = [];
-            for (let id of tasks) {
-                const task = await db.get('tasks', id);
-
-                if (task.status != status.id)
-                    continue;
-
-                result.push(task);
-            }
-
-            return result;
-        }
-
-        getTasks().then(tasks => { setTaskList([...tasks]) });
-    }, [tasks]);
+    const status = useStatus(id, taskList, db);
 
     const onCreateTask = (event) => {
         event.preventDefault();
 
-        const formData = new FormData(event.currentTarget);
-        const data = Object.fromEntries(formData.entries());
-
-        const taskName = data['taskName'];
-
-        const newTask = new Task({ name: taskName, status: status.id });
-        
-        db.add('tasks', newTask).then(() => {
-            onAddTask(newTask.id);
-        });
-
-
-        setTaskList([...taskList, newTask]);
+        const { taskName } = getDataFromForm(event.currentTarget);
+        const task = new Task({ name: taskName, status: id });
+        taskActions.addTask(task);
+        status.addTask(task);
         setAddingTask(false);
     }
 
     const onRenameTask = (event, task) => {
         event.preventDefault();
 
-        const formData = new FormData(event.currentTarget);
-        const data = Object.fromEntries(formData.entries());
+        const { taskName } = getDataFromForm(event.currentTarget);
 
-        const newTaskName = data['taskName'];
+        const updatedTask = { ...task, name: taskName };
+        taskActions.updateTask(updatedTask);
+        status.updateTask(updatedTask);
+        setRenameIndex(-1);
+    }
 
-        if (newTaskName.length < 1) return;
-
-        const newTask = { ...task, name: newTaskName };
-
-        let index;
-        for (let i = 0; i < taskList.length; i++) {
-            if (taskList[i].id === task.id) {
-                index = i;
-                break;   
-            }
-        }
-
-        db.update('tasks', newTask).then(() => {
-            taskList.splice(index, 1, newTask);
-            setTaskList([...taskList]);
-        });
+    const generateTaskContextOptions = (task, taskIndex) => {
+        return [
+            new ContextMenuItem({ title: 'Edit', color: 'var(--color-text)' }),
+            new ContextMenuItem({
+                title: 'Move To',
+                color: 'var(--color-text)',
+                subOptions: [
+                    new ContextMenuItem({
+                        title: 'Status',
+                        color: 'var(--color-text)',
+                        subOptions: statusList.map(_status => new ContextMenuItem({
+                            title: _status.name,
+                            color: 'var(--color-text)',
+                            callback: () => { taskActions.moveTask(task, _status.id); }
+                        }))
+                    })
+                ]
+            }),
+            new ContextMenuItem({ title: 'Rename', color: 'var(--color-text)', callback: () => { setRenameIndex(taskIndex); } }),
+            new ContextMenuItem({ title: 'Delete Task', color: 'var(--color-error)', callback: () => { taskActions.deleteTask(task); }})
+        ]
     }
 
     return <section className="project-status">
@@ -80,28 +65,32 @@ const C_List_Status = ({ status, tasks, onAddTask, onSelectTask, onDeselectTask,
             <button className="expandStatusBtn">
                 <C_SVG sourceURL="/chevron-down.svg" size="1rem" color="var(--color-text)"/>
             </button>
-            <h3 style={{ color: status.color }}>{status.name}</h3>
+            <h3 style={{ color: color }}>{name}</h3>
             <button className="newTaskBtn flex-row" onClick={() => { setAddingTask(true); }}>
                 <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
                 <h6>New Task</h6>
             </button>
             <div className="status-descriptors flex-row">
-                <h6>Priority</h6>
-                <h6>Due Date</h6>
             </div>
         </div>
         <ul className="project-status-items flex-column">
             {addingTask && <C_List_NewTaskForm onSubmit={onCreateTask} onCancel={() => { setAddingTask(false); }} />}
-            {taskList && taskList.map((task) => {
+            {status.tasks && status.tasks.map((task, index) => {
+                if (renameIndex === index)
+                    return <C_List_NewTaskForm
+                        key={task.id}
+                        placeholderText={task.name}
+                        onSubmit={(e) => { onRenameTask(e, task); }}
+                        onCancel={() => { setRenameIndex(-1); }}
+                    />
+
                 return <C_List_Task
                     key={task.id}
                     task={task}
-                    status={status}
-                    onSelect={onSelectTask}
-                    onDeselect={onDeselectTask}
-                    onRenameTask={onRenameTask}
-                    onMoveTask={onMoveTask}
-                    onDeleteTask={onDeleteTask}
+                    color={color}
+                    onSelect={selectTask}
+                    onDeselect={deselectTask}
+                    contextOptions={generateTaskContextOptions(task, index)}
                 />;
             })}
         </ul>
