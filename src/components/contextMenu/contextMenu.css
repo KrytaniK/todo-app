@@ -3,6 +3,7 @@
     background-color: #1f1f1f;
     border-radius: var(--border-radius);
     border: 1px solid #3f3f3f;
+    z-index: 1000;
 }
 
 .context-menu-item {

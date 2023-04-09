@@ -1,10 +1,11 @@
 import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import { C_SVG, C_ContextMenu } from '../';
+import { Project } from "../../utils/schemas";
 import { useIndexedDB } from "../../hooks";
 import './sidebar.css';
 
-const C_Sidebar = ({ projects }) => {
+const C_Sidebar = ({ projects, currentProject }) => {
 
     const [addingNewProject, setAddingNewProject] = useState(false);
     const [renameIndex, setRenameIndex] = useState(-1);
@@ -12,17 +13,7 @@ const C_Sidebar = ({ projects }) => {
     const [selectedProject, setSelectedProject] = useState(undefined);
     const db = useIndexedDB();
 
-    const onRemoveProject = (index) => {
-        const project = projectList[index];
-        const id = project.id;
-        
-        db.remove('projects', id);
-        
-        projectList.splice(index, 1);
-        setProjectList([...projectList]);
-    }
-
-    const onCreateNewProject = (event) => {
+    const onCreateProject = (event) => {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
@@ -30,18 +21,20 @@ const C_Sidebar = ({ projects }) => {
 
         const newName = data["newProjectName"] || "New Project";
 
-        const newProject = {
-            id: Math.floor(Math.random() * 1000),
-            name: newName
-        }
+        db.getAll('statuses').then(statuses => {
+            const newProject = new Project({
+                name: newName,
+                statuses: statuses.filter(status => status.isTemplate)
+            });
 
-        db.add('projects', newProject);
+            db.add('projects', newProject);
 
-        setProjectList([
-            ...projectList,
-            newProject
-        ]);
-        setAddingNewProject(false);
+            setProjectList([
+                ...projectList,
+                newProject
+            ]);
+            setAddingNewProject(false);
+        })
     }
 
     const onRenameProject = (event, project, index) => {
@@ -67,6 +60,24 @@ const C_Sidebar = ({ projects }) => {
             ...projectList
         ])
         setRenameIndex(-1);
+    }
+
+    const onRemoveProject = (index) => {
+        const project = projectList[index];
+        const id = project.id;
+
+        let projectTasks = [...project.tasks];
+
+        // Optionally in the future, it would be nice to instead offer the option to move tasks to a new project
+
+        db.remove('projects', id).then(() => {
+            for (const task of projectTasks) {
+                db.remove('tasks', task);
+            }
+        });
+        
+        projectList.splice(index, 1);
+        setProjectList([...projectList]);
     }
 
     const projectLinkOptions = (id, index) => {
@@ -99,7 +110,7 @@ const C_Sidebar = ({ projects }) => {
                             
                             return <C_ContextMenu key={project.id} options={projectLinkOptions(project.id, index)}>
                                 <Link
-                                    className={`nav-links-category-item flex-row ${selectedProject === project.id ? 'selected' : ''}`}
+                                    className={`nav-links-category-item flex-row ${selectedProject === project.id || currentProject === project.id ? 'selected' : ''}`}
                                     to={`/projects/${project.id}`}
                                     onClick={() => { setSelectedProject(project.id); }}
                                 >
@@ -110,7 +121,7 @@ const C_Sidebar = ({ projects }) => {
                         })
                     }
                     {
-                        addingNewProject && <C_NewProjectInput onSubmit={onCreateNewProject} onCancel={() => { setAddingNewProject(false); }} />
+                        addingNewProject && <C_NewProjectInput onSubmit={onCreateProject} onCancel={() => { setAddingNewProject(false); }} />
                     }
                 </div>
             </section>
@@ -129,7 +140,7 @@ const C_NewProjectInput = ({ onSubmit, onCancel, placeholderText }) => {
         <button type="submit">
             <C_SVG sourceURL="/checkmark.svg" size="1rem" color="var(--color-text)" />
         </button>
-        <button type="button" onClick={() => { onCancel(false); }}>
+        <button type="button" onClick={onCancel}>
             <C_SVG sourceURL="/x.svg" size="1rem" color="var(--color-text)" />
         </button>
     </form>

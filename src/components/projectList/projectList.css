@@ -1,0 +1,84 @@
+.project-list-view {
+    padding: 16px 32px;
+    gap: 16px;
+}
+
+.selectedTasks {
+    width: 100%;
+    justify-content: center;
+}
+
+.project-status {
+    gap: 8px;
+}
+
+.project-status-header, .project-status-items {
+    padding: 8px 0;
+    gap: 8px;
+}
+
+.expandStatusBtn, .newTaskBtn {
+    opacity: 50%;
+    align-items: center;
+    gap: 4px;
+}
+
+.expandStatusBtn:hover, .newTaskBtn:hover {
+    opacity: 100%;
+}
+
+.status-descriptors {
+    padding-right: 16px;
+    align-items: center;
+    justify-content: end;
+    flex: 1;
+    gap: 16px;
+    opacity: 50%;
+}
+
+.status-descriptors h6 {
+    width: 6rem;
+    text-align: center;
+}
+
+.project-listTask {
+    padding: 8px 16px;
+    gap: 16px;
+    background-color: #1f1f1f;
+    border-radius: var(--border-radius);
+    flex: 1;
+    align-items: center;
+}
+
+.project-listTask:hover {
+    cursor: pointer;
+}
+
+.project-task-selector {
+    width: .65rem;
+    height: .65rem;
+    border: 2px solid #f0f0f080;
+    border-radius: var(--border-radius);
+}
+
+.project-listTask p {
+    flex: 1;
+}
+
+.project-listTask-info {
+    gap: 16px;
+}
+
+.project-listTask-info p {
+    width: 6rem;
+    text-align: center;
+}
+
+.project-listTask-new {
+    gap: 16px;
+    width: 100%;
+}
+
+.project-listTask-new input {
+    flex: 1;
+}

@@ -8,22 +8,22 @@ export const router = createBrowserRouter([
     {
         path: '/',
         element: <App />,
-        loader: async () => {
+        loader: async ({ params }) => {
 
             const db = new Database('todo');
             const projects = await db.store('projects').getAll();
 
-            return { projects };
+            return { projects, currentProject: params.projectID };
         },
         children: [
             {
-                path: '/projects/:id',
+                path: '/projects/:projectID',
                 element: <P_Project/>,
                 loader: async ({params}) => {
-                    const { id } = params;
+                    const { projectID } = params;
 
                     const db = new Database('todo');
-                    const project = await db.store('projects').get(Number(id));
+                    const project = await db.store('projects').get(projectID);
 
                     if (!project) return redirect('/');
                     

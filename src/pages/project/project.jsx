@@ -35,14 +35,14 @@ const P_Project = () => {
                 </button>
             </div>
             <div className="project-search flex">
-                <form action="/" className="project-searchbar flex-row" onSubmit={onProjectSearch}>
+                <form className="project-searchbar flex-row" onSubmit={onProjectSearch}>
                     <C_SVG sourceURL="/search.svg" size="1rem" color="var(--color-text)" />
-                    <input type="text" name="searchQuery" placeholder={`Search in ${project.name}`} />
+                    <input type="text" name="searchQuery" placeholder={`Search in ${project.name}`} aria-label="Project Search Bar"/>
                 </form>
             </div>
         </section>
-        { view === 'List' && <C_ProjectList statuses={project.statuses}/> }
-        { view === 'Board' && <C_ProjectBoard statuses={project.statuses}/> }
+        {view === 'List' && <C_ProjectList project={project} /> }
+        {view === 'Board' && <C_ProjectBoard project={project} /> }
     </div>;
 }
 
