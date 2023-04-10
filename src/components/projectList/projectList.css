@@ -14,6 +14,10 @@
     gap: 8px;
 }
 
+.project-status-items {
+    overflow: hidden;
+}
+
 .expandStatusBtn, .newTaskBtn {
     opacity: 50%;
     align-items: center;
@@ -24,18 +28,8 @@
     opacity: 100%;
 }
 
-.status-descriptors {
-    padding-right: 16px;
-    align-items: center;
-    justify-content: end;
-    flex: 1;
-    gap: 16px;
-    opacity: 50%;
-}
-
-.status-descriptors h6 {
-    width: 6rem;
-    text-align: center;
+.expandStatusBtn {
+    transition: transform .5s ease-in-out;
 }
 
 /* Task Styling */

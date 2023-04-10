@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { C_SVG, C_TaskModal } from "../";
+import React, { useRef, useState, useEffect } from "react";
+import { C_Collapsible, C_SVG, C_TaskModal } from "../";
 import C_List_NewTaskForm from "./newTaskForm";
 import { Task, ContextMenuItem } from "../../utils/schemas";
 import { useIndexedDB, useModal, useStatus } from "../../hooks";
@@ -13,10 +13,12 @@ const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskAc
     const [addingTask, setAddingTask] = useState(false);
     const [renameIndex, setRenameIndex] = useState(-1);
     const [viewedTask, setViewedTask] = useState(undefined);
+    const [collapsed, setCollapsed] = useState(false);
 
     const db = useIndexedDB();
     const status = useStatus(id, taskList, db);
     const taskModalControl = useModal();
+    const collapseRef = useRef(undefined);
 
     const onCreateTask = (event) => {
         event.preventDefault();
@@ -73,38 +75,45 @@ const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskAc
 
     return <section className="project-status">
         <div className="project-status-header flex-row">
-            <button className="expandStatusBtn">
+            <button
+                className="expandStatusBtn"
+                ref={collapseRef}
+                onClick={() => { setCollapsed(!collapsed) }}
+                style={{transform: collapsed ? "none" : "rotate(-180deg)"}}
+            >
                 <C_SVG sourceURL="/chevron-down.svg" size="1rem" color="var(--color-text)"/>
             </button>
             <h3 style={{ color: color }}>{name}</h3>
-            <button className="newTaskBtn flex-row" onClick={() => { setAddingTask(true); }}>
+            {!collapsed && <button className="newTaskBtn flex-row" onClick={() => { setAddingTask(true); }}>
                 <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
                 <h6>New Task</h6>
-            </button>
+            </button>}
             <div className="status-descriptors flex-row">
             </div>
         </div>
-        <ul className="project-status-items flex-column">
-            {addingTask && <C_List_NewTaskForm onSubmit={onCreateTask} onCancel={() => { setAddingTask(false); }} />}
-            {status.tasks && status.tasks.map((task, index) => {
-                if (renameIndex === index)
-                    return <C_List_NewTaskForm
-                        key={task.id}
-                        placeholderText={task.name}
-                        onSubmit={(e) => { onRenameTask(e, task); }}
-                        onCancel={() => { setRenameIndex(-1); }}
-                    />
+        <C_Collapsible collapseTriggerRef={collapseRef}>
+            <ul className="project-status-items flex-column">
+                {addingTask && <C_List_NewTaskForm onSubmit={onCreateTask} onCancel={() => { setAddingTask(false); }} />}
+                {status.tasks && status.tasks.map((task, index) => {
+                    if (renameIndex === index)
+                        return <C_List_NewTaskForm
+                            key={task.id}
+                            placeholderText={task.name}
+                            onSubmit={(e) => { onRenameTask(e, task); }}
+                            onCancel={() => { setRenameIndex(-1); }}
+                        />
 
-                return <C_List_Task
-                    key={task.id}
-                    task={task}
-                    color={color}
-                    onSelect={selectTask}
-                    onDeselect={deselectTask}
-                    contextOptions={generateTaskContextOptions(task, index)}
-                />;
-            })}
-        </ul>
+                    return <C_List_Task
+                        key={task.id}
+                        task={task}
+                        color={color}
+                        onSelect={selectTask}
+                        onDeselect={deselectTask}
+                        contextOptions={generateTaskContextOptions(task, index)}
+                    />;
+                })}
+            </ul>
+        </C_Collapsible>
         <C_TaskModal control={taskModalControl} task={viewedTask} onSaveTask={onSaveTask} />
     </section>
 }
