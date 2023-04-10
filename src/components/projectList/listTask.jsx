@@ -5,7 +5,8 @@ const C_List_Task = ({ task, color, onSelect, onDeselect, contextOptions }) => {
 
     const [selected, setSelected] = useState(false);
 
-    const selectTask = () => {
+    const selectTask = (event) => {
+        event.stopPropagation();
 
         if (selected)
             onDeselect(task);

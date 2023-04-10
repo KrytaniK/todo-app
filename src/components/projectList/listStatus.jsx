@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { C_SVG } from "../";
+import { C_SVG, C_TaskModal } from "../";
 import C_List_NewTaskForm from "./newTaskForm";
 import { Task, ContextMenuItem } from "../../utils/schemas";
-import { useIndexedDB, useStatus } from "../../hooks";
+import { useIndexedDB, useModal, useStatus } from "../../hooks";
 import C_List_Task from "./listTask";
 import { getDataFromForm } from "../../utils/util";
 
@@ -12,9 +12,11 @@ const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskAc
 
     const [addingTask, setAddingTask] = useState(false);
     const [renameIndex, setRenameIndex] = useState(-1);
+    const [viewedTask, setViewedTask] = useState(undefined);
 
     const db = useIndexedDB();
     const status = useStatus(id, taskList, db);
+    const taskModalControl = useModal();
 
     const onCreateTask = (event) => {
         event.preventDefault();
@@ -37,9 +39,18 @@ const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskAc
         setRenameIndex(-1);
     }
 
+    const onSaveTask = (task) => {
+        taskActions.updateTask(task);
+        status.updateTask(task);
+    }
+
     const generateTaskContextOptions = (task, taskIndex) => {
         return [
-            new ContextMenuItem({ title: 'Edit', color: 'var(--color-text)' }),
+            new ContextMenuItem({
+                title: 'View / Edit',
+                color: 'var(--color-text)',
+                callback: () => { setViewedTask(task); taskModalControl.toggle(); }
+            }),
             new ContextMenuItem({
                 title: 'Move To',
                 color: 'var(--color-text)',
@@ -94,6 +105,7 @@ const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskAc
                 />;
             })}
         </ul>
+        <C_TaskModal control={taskModalControl} task={viewedTask} onSaveTask={onSaveTask} />
     </section>
 }
 

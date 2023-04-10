@@ -1,0 +1,59 @@
+.task-modal {
+    gap: 16px;
+    min-width: 384px;
+}
+
+.tm-header, .tm-name {
+    align-items: center;
+}
+
+.tm-header {
+    justify-content: end;
+}
+
+.tm-name {
+    justify-content: space-between;
+    min-height: 2rem;
+}
+
+.savedTaskName {
+    flex: 1;
+}
+
+.tm-name {
+    flex: 1;
+    gap: 16px;
+}
+
+.tm-name h2 {
+    flex: 1;
+}
+
+.tm-actions {
+    flex: 1;
+    justify-content: end;
+}
+
+#tm-newTaskName-form {
+    flex: 1;
+}
+
+#tm-newTaskName {
+    flex: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    opacity: 75%;
+}
+
+#tm-newTaskName:focus {
+    opacity: 100%;
+}
+
+#tm-newTaskName:hover {
+    opacity: 100%;
+}
+
+.tm-saveTask {
+    background-color: var(--color-primary);
+    padding: 8px 16px;
+}
