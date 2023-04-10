@@ -6,7 +6,7 @@ import { useIndexedDB, useModal, useStatus } from "../../hooks";
 import C_List_Task from "./listTask";
 import { getDataFromForm } from "../../utils/util";
 
-const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskActions }) => {
+const C_List_Status = ({ status: { id, name, color }, taskList, statusList, taskActions }) => {
 
     const { selectTask, deselectTask } = taskActions;
 
@@ -91,7 +91,7 @@ const C_List_Status = ({ status: {id, name, color}, taskList, statusList, taskAc
             <div className="status-descriptors flex-row">
             </div>
         </div>
-        <C_Collapsible collapseTriggerRef={collapseRef}>
+        <C_Collapsible id={id} collapseTriggerRef={collapseRef}>
             <ul className="project-status-items flex-column">
                 {addingTask && <C_List_NewTaskForm onSubmit={onCreateTask} onCancel={() => { setAddingTask(false); }} />}
                 {status.tasks && status.tasks.map((task, index) => {

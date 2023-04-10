@@ -1,17 +1,35 @@
 import React, { useEffect, useRef } from "react";
 import './collapsible.css';
 
-const C_Collapsible = ({ children, collapseTriggerRef }) => {
-    
+const C_Collapsible = ({ children, id, collapseTriggerRef }) => {
+
     const collapsible = useRef(undefined);
+    const oldRect = useRef(undefined);
+
+    useEffect(() => {
+        if (oldRect.current) return;
+        const el = document.getElementById(id);
+        oldRect.current = el.querySelector('.collapsible-measure').getBoundingClientRect();
+    }, []);
 
     useEffect(() => {
         if (!collapsible) return;
 
         collapseTriggerRef.current.addEventListener('click', toggleCollapse);
 
+        const measure = collapsible.current.querySelector('.collapsible-measure');
+        const resizeObserver = new ResizeObserver((entries) => {
+            if (oldRect.current.height !== entries[0].contentRect.height) {
+                collapsible.current.style.height = entries[0].contentRect.height + "px";
+                oldRect.current = entries[0].contentRect.height;
+            }
+        });
+
+        resizeObserver.observe(measure);
+
         return () => {
             collapseTriggerRef.current.removeEventListener('click', toggleCollapse);
+            resizeObserver.disconnect();
         }
     }, []);
 
@@ -24,12 +42,12 @@ const C_Collapsible = ({ children, collapseTriggerRef }) => {
         if (collapsible.current.clientHeight) {
             collapsible.current.style.height = 0;
         } else {
-            const tasksContainer = collapsible.current.querySelector('.collapsible-measure');
-            collapsible.current.style.height = tasksContainer.clientHeight + "px";
+            const measure = collapsible.current.querySelector('.collapsible-measure');
+            collapsible.current.style.height = measure.clientHeight + "px";
         }
     }
 
-    return <div className="collapsible" ref={collapsible}>
+    return <div id={id} className="collapsible" ref={collapsible}>
         <div className="collapsible-measure">
             {children}
         </div>
