@@ -79,16 +79,61 @@ const useProject = (projectID, database) => {
         setSelectedTasks([...selectedTasks]);
     }
 
+    const moveSelectedTasks = (newStatus) => {
+        for (let task of selectedTasks) {
+            const newTask = { ...task, status: newStatus }
+            database.update('tasks', newTask);
+
+            let index;
+            for (let i = 0; i < selectedTasks.length; i++) {
+                if (selectedTasks[i].id === task.id) {
+                    index = i;
+                    break;
+                }
+            }
+            taskList.splice(index, 1, newTask);
+        }
+
+        setTaskList([...taskList]);
+        setSelectedTasks([]);
+    }
+
+    const deleteSelectedTasks = async () => {
+        for (let task of selectedTasks) {
+            await database.remove('tasks', task.id);
+
+            let index;
+            for (let i = 0; i < selectedTasks.length; i++) {
+                if (selectedTasks[i].id === task.id) {
+                    index = i;
+                    break;
+                }
+            }
+            taskList.splice(index, 1);
+        }
+
+        await database.update('projects', {
+            ...project,
+            tasks: [...taskList]
+        })
+
+        setTaskList([...taskList]);
+        setSelectedTasks([]);
+    }
+
     return {
         project,
         taskList,
+        selectedTasks,
         taskActions: {
             addTask,
             updateTask,
             moveTask,
             deleteTask,
             selectTask,
-            deselectTask
+            deselectTask,
+            moveSelectedTasks,
+            deleteSelectedTasks
         }
     }
 }

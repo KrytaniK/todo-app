@@ -1,34 +1,33 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, forwardRef } from "react";
 import './collapsible.css';
 
-const C_Collapsible = ({ children, id, collapseTriggerRef }) => {
+const C_Collapsible = forwardRef(({ children, id }, ref) => {
 
     const collapsible = useRef(undefined);
     const oldRect = useRef(undefined);
-
+    
     useEffect(() => {
-        if (oldRect.current) return;
-        const el = document.getElementById(id);
-        oldRect.current = el.querySelector('.collapsible-measure').getBoundingClientRect();
-    }, []);
+        if (!collapsible || !ref) return;
 
-    useEffect(() => {
-        if (!collapsible) return;
+        if (!oldRect.current) {
+            const el = document.getElementById(id);
+            oldRect.current = el.querySelector('.collapsible-measure').getBoundingClientRect();
+        }
 
-        collapseTriggerRef.current.addEventListener('click', toggleCollapse);
+        ref.current.addEventListener('click', toggleCollapse);
 
         const measure = collapsible.current.querySelector('.collapsible-measure');
         const resizeObserver = new ResizeObserver((entries) => {
             if (oldRect.current.height !== entries[0].contentRect.height) {
                 collapsible.current.style.height = entries[0].contentRect.height + "px";
-                oldRect.current = entries[0].contentRect.height;
+                oldRect.current = entries[0].contentRect;
             }
         });
 
         resizeObserver.observe(measure);
 
         return () => {
-            collapseTriggerRef.current.removeEventListener('click', toggleCollapse);
+            ref.current.removeEventListener('click', toggleCollapse);
             resizeObserver.disconnect();
         }
     }, []);
@@ -52,6 +51,6 @@ const C_Collapsible = ({ children, id, collapseTriggerRef }) => {
             {children}
         </div>
     </div>
-}
+})
 
 export default C_Collapsible;

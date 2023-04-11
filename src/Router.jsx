@@ -23,6 +23,10 @@ export const router = createBrowserRouter([
                 element: <P_Project/>,
                 loader: async ({params}) => {
                     const { projectID } = params;
+
+                    const db = new Database('todo');
+                    const project = await db.store('projects').get(projectID);
+                    if (!project) return redirect('/');
                     
                     return {
                         projectID

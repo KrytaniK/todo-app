@@ -84,14 +84,14 @@ const C_List_Status = ({ status: { id, name, color }, taskList, statusList, task
                 <C_SVG sourceURL="/chevron-down.svg" size="1rem" color="var(--color-text)"/>
             </button>
             <h3 style={{ color: color }}>{name}</h3>
-            {!collapsed && <button className="newTaskBtn flex-row" onClick={() => { setAddingTask(true); }}>
+            {!collapsed ? <button className="newTaskBtn flex-row" onClick={() => { setAddingTask(true); }}>
                 <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
                 <h6>New Task</h6>
-            </button>}
+            </button> : <p className="small flex-row project-status-taskCount">{status.tasks.length} tasks</p>}
             <div className="status-descriptors flex-row">
             </div>
         </div>
-        <C_Collapsible id={id} collapseTriggerRef={collapseRef}>
+        <C_Collapsible id={id} ref={collapseRef}>
             <ul className="project-status-items flex-column">
                 {addingTask && <C_List_NewTaskForm onSubmit={onCreateTask} onCancel={() => { setAddingTask(false); }} />}
                 {status.tasks && status.tasks.map((task, index) => {

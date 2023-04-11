@@ -1,24 +1,16 @@
-.context-menu {
+.menu {
     position: absolute;
     background-color: #1f1f1f;
+    border: 2px solid #373737;
     border-radius: var(--border-radius);
-    border: 1px solid #3f3f3f;
     z-index: 1000;
-    min-width: max-content;
 }
-
-.submenu-container {
-    position: relative;
-    height: 100%;
-    width: 1px;
-}
-
 .menu-item {
+    position: relative;
     padding: 8px 16px;
-    flex: 1;
-    opacity: 60%;
-    justify-content: space-between;
-    min-width: 4rem;
+    opacity: 75%;
+    min-width: fit-content;
+    white-space: nowrap;
 }
 
 .menu-item:hover {

@@ -11,7 +11,7 @@ const P_Project = () => {
     const { projectID } = useLoaderData();
 
     const db = useIndexedDB();
-    const {project, taskList, taskActions} = useProject(projectID, db);
+    const {project, selectedTasks, taskList, taskActions} = useProject(projectID, db);
 
     // const onProjectSearch = (event) => {
 
@@ -45,7 +45,7 @@ const P_Project = () => {
                 </form>
             </div> */}
         </section>
-        {view === 'List' && <C_ProjectList statuses={project.statuses} taskList={taskList} taskActions={taskActions} /> }
+        {view === 'List' && <C_ProjectList statuses={project.statuses} selectedTasks={selectedTasks} taskList={taskList} taskActions={taskActions} /> }
         {/* {view === 'Board' && <C_ProjectBoard statuses={_project.statuses} taskList={project.taskList} taskActions={project.taskActions} /> } */}
     </div>;
 }
