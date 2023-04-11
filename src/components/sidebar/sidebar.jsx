@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
 import { C_SVG, C_ContextMenu } from '../';
 import { Project } from "../../utils/schemas";
 import { useIndexedDB } from "../../hooks";
@@ -22,7 +22,6 @@ const C_Sidebar = ({ projects, currentProject }) => {
 
     useEffect(() => {
         localStorage.setItem('lastViewedProject', selectedProject);
-        navigate(`/projects/${selectedProject}`);
     }, [selectedProject]);
 
     const onCreateProject = (event) => {
@@ -124,14 +123,14 @@ const C_Sidebar = ({ projects, currentProject }) => {
                             if (renameIndex === project.id) return <C_NewProjectInput key={project.id} onSubmit={e => onRenameProject(e, project, index)} onCancel={() => { setRenameIndex(-1); }} placeholderText={project.name}/>
                             
                             return <C_ContextMenu key={project.id} options={projectLinkOptions(project.id, index)}>
-                                <Link
+                                <button
                                     className={`nav-links-category-item flex-row ${selectedProject === project.id ? 'selected' : ''}`}
                                     to={`/projects/${project.id}`}
-                                    onClick={() => { setSelectedProject(project.id); }}
+                                    onClick={() => { setSelectedProject(project.id); window.location.replace(`/projects/${project.id}`); window.history.pushState({}, "", `/projects/${project.id}`)}}
                                 >
                                     <C_SVG sourceURL="/folder-open.svg" size="1rem" color="var(--color-text)" />
                                     <h5>{project.name}</h5>
-                                </Link>
+                                </button>
                             </C_ContextMenu>
                         })
                     }

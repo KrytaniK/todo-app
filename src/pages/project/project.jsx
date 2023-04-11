@@ -11,7 +11,7 @@ const P_Project = () => {
     const { projectID } = useLoaderData();
 
     const db = useIndexedDB();
-    const {project, selectedTasks, taskList, taskActions} = useProject(projectID, db);
+    const {project, statuses, selectedTasks, taskList, taskActions} = useProject(projectID, db);
 
     // const onProjectSearch = (event) => {
 
@@ -34,9 +34,9 @@ const P_Project = () => {
                 <button className={`project-tab ${view === "List" ? "selected" : ""}`} onClick={() => { setView('List'); }}>
                     <p>List View</p>
                 </button>
-                {/* <button className={`project-tab ${view === "Board" ? "selected" : ""}`}  onClick={() => { setView('Board'); }}>
+                <button className={`project-tab ${view === "Board" ? "selected" : ""}`}  onClick={() => { setView('Board'); }}>
                     Board
-                </button> */}
+                </button>
             </div>
             {/* <div className="project-search flex">
                 <form className="project-searchbar flex-row" onSubmit={onProjectSearch}>
@@ -46,7 +46,7 @@ const P_Project = () => {
             </div> */}
         </section>
         {view === 'List' && <C_ProjectList statuses={project.statuses} selectedTasks={selectedTasks} taskList={taskList} taskActions={taskActions} /> }
-        {/* {view === 'Board' && <C_ProjectBoard statuses={_project.statuses} taskList={project.taskList} taskActions={project.taskActions} /> } */}
+        {view === 'Board' && <C_ProjectBoard statuses={_project.statuses} taskList={project.taskList} taskActions={project.taskActions} /> }
     </div>;
 }
 

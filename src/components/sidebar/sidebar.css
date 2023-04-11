@@ -48,6 +48,7 @@
     align-items: center;
     border-radius: var(--border-radius);
     opacity: 50%;
+    width: 100%;
 }
 
 .selected {

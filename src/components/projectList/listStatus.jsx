@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { C_Collapsible, C_SVG, C_TaskModal } from "../";
 import C_List_NewTaskForm from "./newTaskForm";
 import { Task, ContextMenuItem } from "../../utils/schemas";
@@ -8,15 +8,15 @@ import { getDataFromForm } from "../../utils/util";
 
 const C_List_Status = ({ status: { id, name, color }, taskList, statusList, taskActions }) => {
 
+    const db = useIndexedDB();
+    const status = useStatus(id, taskList, db);
     const { selectTask, deselectTask } = taskActions;
-
+    
     const [addingTask, setAddingTask] = useState(false);
     const [renameIndex, setRenameIndex] = useState(-1);
     const [viewedTask, setViewedTask] = useState(undefined);
     const [collapsed, setCollapsed] = useState(false);
-
-    const db = useIndexedDB();
-    const status = useStatus(id, taskList, db);
+    
     const taskModalControl = useModal();
     const collapseRef = useRef(undefined);
 
@@ -73,7 +73,7 @@ const C_List_Status = ({ status: { id, name, color }, taskList, statusList, task
         ]
     }
 
-    return <section className="project-status">
+    return status && <section className="project-status">
         <div className="project-status-header flex-row">
             <button
                 className="expandStatusBtn"

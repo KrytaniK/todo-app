@@ -6,14 +6,18 @@ import Database from './utils/indexedDB';
 
 export const router = createBrowserRouter([
     {
+        id: 'app',
         path: '/',
         element: <App />,
-        loader: async ({ params }) => {
+        loader: async ({params}) => {
 
             const db = new Database('todo');
             const projects = await db.store('projects').getAll();
 
             const lastViewedProject = localStorage.getItem('lastViewedProject') || projects[0].id;
+
+            if (!params.projectID && lastViewedProject)
+                return redirect(`/projects/${lastViewedProject}`);
 
             return { projects, currentProject: lastViewedProject };
         },
