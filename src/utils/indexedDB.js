@@ -9,7 +9,6 @@ export default class Database {
     }
 
     store = (storeName) => {
-
         // Retrieve database info via local Storage
         const dbData = this.dbDriver.getLocalData(this.dbName);
 
@@ -32,6 +31,7 @@ export default class Database {
     }
 
     get = (itemID) => {
+
         return new Promise((resolve, reject) => {
             if (!this.currentObjectStoreName) {
                 reject("No Object Store Specified! Please ensure you use db.store().add() if you wish to add an entry");
@@ -45,10 +45,36 @@ export default class Database {
                     reject(event.target.error);
                 }
 
-                const store = transaction.objectStore(this.currentObjectStoreName);
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
                 const getRequest = store.get(itemID);
                 getRequest.onsuccess = event => resolve(event.target.result);
                 getRequest.onerror = event => reject(event.target.error);
+            })
+        })
+    }
+
+    getMany = (itemIDList = []) => {
+        return new Promise((resolve, reject) => {
+            if (!this.currentObjectStoreName) {
+                reject("No Object Store Specified! Please ensure you use db.store().add() if you wish to add an entry");
+            }
+
+            this.dbDriver.getConnection(this.dbName).then(connection => {
+
+                let result = [], errors = [];
+
+                const transaction = connection.transaction([this.currentObjectStoreName], 'readonly');
+                transaction.oncomplete = () => {
+                    connection.close();
+                    resolve({ result, errors });
+                }
+
+                for (let itemID of itemIDList) {
+                    const store = transaction.objectStore(transaction.objectStoreNames[0]);
+                    const getRequest = store.get(itemID);
+                    getRequest.onsuccess = event => result.push(event.target.result);
+                    getRequest.onerror = event => errors.push(event.target.error);
+                }
             })
         })
     }
@@ -67,7 +93,7 @@ export default class Database {
                     reject(event.target.error);
                 }
 
-                const store = transaction.objectStore(this.currentObjectStoreName);
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
                 const getAllRequest = store.getAll();
                 getAllRequest.onsuccess = event => resolve(event.target.result);
             })
@@ -89,7 +115,7 @@ export default class Database {
                     reject(event.target.error);
                 }
 
-                const store = transaction.objectStore(this.currentObjectStoreName);
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
 
                 const cursorRequest = store.openCursor(item.id);
                 cursorRequest.onsuccess = (event) => {
@@ -103,6 +129,43 @@ export default class Database {
 
                     if (this.debugMode)
                         console.warn("Database.add() | item with id of", item.id, "already exists!");
+                }
+            });
+        });
+    }
+
+    addMany = (items = []) => {
+        return new Promise((resolve, reject) => {
+            if (!this.currentObjectStoreName) {
+                reject("No Object Store Specified! Please ensure you use db.store().add() if you wish to add an entry");
+            }
+            
+            this.dbDriver.getConnection(this.dbName).then(async (connection) => {
+
+                let result = [], errors = [];
+
+                const transaction = connection.transaction([this.currentObjectStoreName], 'readwrite');
+                transaction.oncomplete = () => {
+                    connection.close();
+                    resolve({ result, errors });
+                };
+
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
+
+                for (let item of items) {
+                    const cursorRequest = store.openCursor(item.id);
+                    cursorRequest.onsuccess = (event) => {
+                        const cursor = event.target.result;
+
+                        if (!cursor) {
+                            const addRequest = store.add(item);
+                            addRequest.onsuccess = event => result.push(event.target.result);
+                            addRequest.onerror = event => errors.push(event.target.error);
+                            return;
+                        }
+                        
+                        errors.push(`${item.id} already exists`);   
+                    }
                 }
             });
         });
@@ -123,10 +186,37 @@ export default class Database {
                     reject(event.target.error);
                 }
 
-                const store = transaction.objectStore(this.currentObjectStoreName);
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
                 const putRequest = store.put(item);
                 putRequest.onsuccess = event => resolve(event.target.result);
             })
+        });
+    }
+
+    updateMany = (items = []) => {
+        return new Promise((resolve, reject) => {
+            if (!this.currentObjectStoreName) {
+                reject("No Object Store Specified! Please ensure you use db.store().add() if you wish to add an entry");
+            }
+            
+            this.dbDriver.getConnection(this.dbName).then(async (connection) => {
+
+                let result = [], errors = [];
+
+                const transaction = connection.transaction([this.currentObjectStoreName], 'readwrite');
+                transaction.oncomplete = () => {
+                    connection.close();
+                    resolve({ result, errors });
+                };
+
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
+
+                for (let item of items) {
+                    const putRequest = store.put(item);
+                    putRequest.onsuccess = event => result.push(event.target.result);
+                    putRequest.onerror = event => errors.push(event.target.error);
+                }
+            });
         });
     }
 
@@ -138,13 +228,13 @@ export default class Database {
 
             this.dbDriver.getConnection(this.dbName).then(connection => {
                 const transaction = connection.transaction([this.currentObjectStoreName], 'readwrite');
-                transaction.oncomplete = (event) => connection.close();
+                transaction.oncomplete = () => connection.close();
                 transaction.onerror = (event) => {
                     connection.close();
                     reject(event.target.error);
                 }
 
-                const store = transaction.objectStore(this.currentObjectStoreName);
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
 
                 const cursorRequest = store.openCursor(itemID);
                 cursorRequest.onsuccess = (event) => {
@@ -160,6 +250,41 @@ export default class Database {
                         console.warn("Database.delete() | itemID of", itemID, "Does not exist!");
                 }
 
+            })
+        })
+    }
+
+    removeMany = (itemIDList = []) => {
+        return new Promise((resolve, reject) => {
+            if (!this.currentObjectStoreName) {
+                reject("No Object Store Specified! Please ensure you use db.store().delete() if you wish to delete an entry");
+            }
+
+            this.dbDriver.getConnection(this.dbName).then(connection => {
+                const transaction = connection.transaction([this.currentObjectStoreName], 'readwrite');
+                transaction.oncomplete = () => {
+                    connection.close();
+                    resolve({ result, errors });
+                }
+
+                let result = [], errors = [];
+
+                const store = transaction.objectStore(transaction.objectStoreNames[0]);
+
+                for (let id of itemIDList) {
+                    const cursorRequest = store.openCursor(id);
+                    cursorRequest.onsuccess = (event) => {
+                        const cursor = event.target.result;
+
+                        if (cursor) {
+                            const deleteRequest = store.delete(id);
+                            deleteRequest.onsuccess = event => result.push(event.target.result);
+                            return;
+                        }
+
+                        errors.push("Database.delete() | itemID of" + id + "Does not exist!");
+                    }
+                }
             })
         })
     }
