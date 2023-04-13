@@ -15,10 +15,6 @@
 
 /* Status Styling */
 
-.project-status {
-    gap: 8px;
-}
-
 .project-status-header, .project-status-items {
     padding: 8px 0;
 }
@@ -32,6 +28,11 @@
     overflow: hidden;
     min-height: 2rem;
     gap: 8px;
+}
+
+.project-status-items:empty {
+    padding: 0;
+    min-height: 0px;
 }
 
 .expandStatusBtn, .newTaskBtn {

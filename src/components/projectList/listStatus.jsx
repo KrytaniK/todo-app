@@ -5,13 +5,10 @@ import C_List_NewTaskForm from "./newTaskForm";
 import { Task } from "../../utils/schemas";
 import { useIndexedDB } from "../../hooks";
 import { getDataFromForm } from "../../utils/util";
-import { useRouteLoaderData } from "react-router-dom";
 
-const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
+const C_List_Status = ({ project, status, taskList, onTaskStatusChange, onSelectTask, onDeselectTask }) => {
 
     const { id, name, color } = status;
-    
-    const { project } = useRouteLoaderData('project');
     
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
@@ -20,16 +17,22 @@ const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
     const db = useIndexedDB();
 
     useEffect(() => {
-        setIsCollapsed(false);
+        setIsCollapsed(taskList.length === 0 || false);
     }, [status])
 
     useEffect(() => {
-        setTasks([...project.tasks]);
+        filterTasks(project.tasks);
     }, [project]);
 
     useEffect(() => {
-        setTasks([...taskList]);
+        filterTasks(taskList);
     }, [taskList])
+
+    const filterTasks = (_tasks) => {
+        const filteredTasks = _tasks.filter((_task) => id === _task.status);
+        setTasks([...filteredTasks]);
+        setIsCollapsed(!filteredTasks.length);
+    }
 
     const addTaskToStatus = (event) => {
         event.preventDefault();
@@ -37,12 +40,12 @@ const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
         const { taskName } = getDataFromForm(event.currentTarget);
 
         const task = new Task({ name: taskName, status: status.id });
-        console.log(task);
 
         db.add('tasks', {...task}).then(() => {
             db.update('projects', { ...project, tasks: [...tasks.map(task => task.id), task.id] }).then(() => {
                 setTasks([...tasks, task]);
                 setIsAddingTask(false);
+                if (isCollapsed) setIsCollapsed(false);
             });
         });
     }
@@ -65,7 +68,7 @@ const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
             <h3 style={{ color: color }}>{name}</h3>
 
             {
-                isCollapsed ? <h6 className="project-status-taskCount">{tasks.filter(task => task.status === id).length} tasks</h6> :
+                tasks && tasks.length && isCollapsed ? <h6 className="project-status-taskCount">{tasks.filter(task => task.status === id).length} tasks</h6> :
                     <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
                         <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
                         <h6>New Task</h6>
@@ -76,8 +79,6 @@ const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
             <ul className="project-status-items flex-column">
                 {isAddingTask && <C_List_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }}/>}
                 {tasks && tasks.map(task => {
-                    if (task.status !== id) return null;
-                    
                     return <C_List_Task
                         key={task.id}
                         taskData={task}
@@ -86,6 +87,8 @@ const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
                         taskList={tasks}
                         removeTaskFromStatus={removeTaskFromStatus}
                         changeTaskStatus={onTaskStatusChange}
+                        onSelectTask={onSelectTask}
+                        onDeselectTask={onDeselectTask}
                     />;
                 })}
             </ul>

@@ -7,7 +7,7 @@ import C_List_NewTaskForm from "./newTaskForm";
 import { getDataFromForm } from "../../utils/util";
 import { useIndexedDB } from "../../hooks";
 
-const C_List_Task = ({ taskData, color, project, taskList, removeTaskFromStatus, changeTaskStatus }) => {
+const C_List_Task = ({ taskData, color, project, taskList, removeTaskFromStatus, changeTaskStatus, onSelectTask, onDeselectTask }) => {
 
     const [selected, setSelected] = useState(false);
     const [isRenaming, setIsRenaming] = useState(false);
@@ -18,6 +18,12 @@ const C_List_Task = ({ taskData, color, project, taskList, removeTaskFromStatus,
 
     const selectTask = (event) => {
         event.stopPropagation();
+
+        if (!selected)
+            onSelectTask(task);
+        else
+            onDeselectTask(task);
+
 
         setSelected(!selected);
     }
@@ -55,6 +61,8 @@ const C_List_Task = ({ taskData, color, project, taskList, removeTaskFromStatus,
         task.status = newStatusID;
         updateTask(task);
         changeTaskStatus(task);
+        if (selected)
+            onDeselectTask(task);
     }
 
     const generateContextOptions = () => {

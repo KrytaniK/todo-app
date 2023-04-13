@@ -7,7 +7,7 @@ const P_Project = () => {
 
     const [view, setView] = useState('List');
 
-    const { project } = useLoaderData();
+    const { project, taskIDList } = useLoaderData();
 
     useEffect(() => {
         window.dispatchEvent(new CustomEvent('projectchange', { detail: { projectID: project.id } }));
@@ -27,7 +27,7 @@ const P_Project = () => {
                 </button>
             </div>
         </section>
-        {view === 'List' && <C_ProjectList statusList={project.statuses} taskList={project.tasks} /> }
+        {view === 'List' && <C_ProjectList project={project} taskIDList={taskIDList} statusList={project.statuses} taskList={project.tasks} /> }
         {/* {view === 'Board' && <C_ProjectBoard statuses={_project.statuses} taskList={project.taskList} taskActions={project.taskActions} /> } */}
     </div>;
 }
