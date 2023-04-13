@@ -1,102 +1,79 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { C_ContextMenu, C_TaskModal } from '../';
-import { useRouteLoaderData } from "react-router-dom";
 import { useModal } from "../../hooks";
 import { ContextMenuItem } from "../../utils/schemas";
 import C_List_NewTaskForm from "./newTaskForm";
 import { getDataFromForm } from "../../utils/util";
 import { useIndexedDB } from "../../hooks";
 
-const C_List_Task = ({ taskData, color, project, taskList, removeTaskFromStatus, changeTaskStatus, onSelectTask, onDeselectTask }) => {
+const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask, selectTask, deselectTask }) => {
 
-    const [selected, setSelected] = useState(false);
     const [isRenaming, setIsRenaming] = useState(false);
-    const [task, setTask] = useState({ ...taskData });
     
-    const db = useIndexedDB();
     const _modal = useModal();
+    const db = useIndexedDB();
 
-    const selectTask = (event) => {
+    const onSelectTask = (event) => {
         event.stopPropagation();
 
         if (!selected)
-            onSelectTask(task);
+            selectTask(task);
         else
-            onDeselectTask(task);
-
-
-        setSelected(!selected);
+            deselectTask(task);
     }
 
-    const updateTask = (task) => {
-        db.update('tasks', task).then(() => {
-            setTask(task);
-        });
-    }
-
-    const deleteTask = () => {
-
-        const newTaskList = [];
-        for (let i = 0; i < taskList.length; i++) {
-            if (taskList[i].id !== task.id)
-                newTaskList.push(project.tasks[i].id);
-        }
-
-        db.update('projects', { ...project, tasks: [...newTaskList] }).then(() => {
-            db.remove('tasks', task.id);
-        }).then(() => {
-            removeTaskFromStatus(task);
-        })
-    }
-
-    const onRenameSubmit = event => {
+    const onRenameTask = event => {
         event.preventDefault();
         const { taskName } = getDataFromForm(event.currentTarget);
 
-        updateTask({ ...task, name: taskName });
-        setIsRenaming(false);
+        const newTask = { ...task, name: taskName };
+        db.update('tasks', newTask).then(() => {
+            updateTask(newTask);
+            setIsRenaming(false);
+        });
     }
 
     const onMovetask = (newStatusID) => {
-        task.status = newStatusID;
-        updateTask(task);
-        changeTaskStatus(task);
-        if (selected)
-            onDeselectTask(task);
+        const newTask = { ...task, status: newStatusID };
+        db.update('tasks', newTask).then(() => {
+            updateTask(newTask);
+        });
     }
 
-    const generateContextOptions = () => {
-        return [
-            new ContextMenuItem({
-                title: 'View / Edit',
-                color: 'var(--color-text)',
-                callback: () => { _modal.toggle(); }
-            }),
-            new ContextMenuItem({
-                title: 'Move To',
-                color: 'var(--color-text)',
-                subOptions: [
-                    new ContextMenuItem({
-                        title: 'Status',
+    const taskContextOptions = [
+        new ContextMenuItem({
+            title: 'View / Edit',
+            color: 'var(--color-text)',
+            callback: () => { _modal.toggle(); }
+        }),
+        new ContextMenuItem({
+            title: 'Move To',
+            color: 'var(--color-text)',
+            subOptions: [
+                new ContextMenuItem({
+                    title: 'Status',
+                    color: 'var(--color-text)',
+                    subOptions: !statusList ? [] : statusList.map(status => new ContextMenuItem({
+                        title: status.name,
                         color: 'var(--color-text)',
-                        subOptions: project.statuses.map(status => new ContextMenuItem({
-                            title: status.name,
-                            color: 'var(--color-text)',
-                            callback: () => { onMovetask(status.id); }
-                        }))
-                    })
-                ]
-            }),
-            new ContextMenuItem({ title: 'Rename', color: 'var(--color-text)', callback: () => { setIsRenaming(true); } }),
-            new ContextMenuItem({ title: 'Delete Task', color: 'var(--color-error)', callback: deleteTask})
-        ]
-    }
+                        callback: () => { onMovetask(status.id); }
+                    }))
+                })
+            ]
+        }),
+        new ContextMenuItem({ title: 'Rename', color: 'var(--color-text)', callback: () => { setIsRenaming(true); } }),
+        new ContextMenuItem({
+            title: 'Delete Task',
+            color: 'var(--color-error)',
+            callback: () => { 
+                db.remove('tasks', task.id).then(() => { removeTask(task); })
+            }
+        })
+    ]
 
-    if (!task) return null;
-
-    return task && isRenaming ? <C_List_NewTaskForm placeholderText={task.name} onSubmit={onRenameSubmit} onCancel={() => { setIsRenaming(false); }} /> : <>
-        <C_ContextMenu options={generateContextOptions()}>
-            <div className="project-listTask flex-row" onClick={selectTask}>
+    return task && isRenaming ? <C_List_NewTaskForm placeholderText={task.name} onSubmit={onRenameTask} onCancel={() => { setIsRenaming(false); }} /> : <>
+        <C_ContextMenu options={taskContextOptions}>
+            <div className="project-listTask flex-row" onClick={onSelectTask}>
                 <div
                     className="project-task-selector"
                     style={{ border: selected && `2px solid ${color}`, backgroundColor: selected && color }}

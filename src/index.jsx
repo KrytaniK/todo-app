@@ -9,14 +9,14 @@ import { Status } from './utils/schemas';
 
 if (!JSON.parse(localStorage.getItem('isFirstLoad'))) {
   const db = new Database('todo');
-  db.store('statuses').add(new Status({ name: 'Waiting', color: 'white', isTemplate: true }));
-  db.store('statuses').add(new Status({ name: 'In Progress', color: 'white', isTemplate: true }));
-  db.store('statuses').add(new Status({ name: 'Done', color: 'white', isTemplate: true }));
+  db.store('statuses').add(new Status({ id: '1', name: 'Waiting', color: 'white', isTemplate: true }));
+  db.store('statuses').add(new Status({ id: '2', name: 'In Progress', color: 'white', isTemplate: true }));
+  db.store('statuses').add(new Status({ id: '3', name: 'Done', color: 'white', isTemplate: true }));
   localStorage.setItem('isFirstLoad', true);
 }
 
 createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
     <RouterProvider router={router} />
-  // {/* </React.StrictMode>, */}
+  // </React.StrictMode>,
 )

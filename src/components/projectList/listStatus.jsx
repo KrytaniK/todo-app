@@ -1,99 +1,64 @@
 import React, { useEffect, useRef, useState } from "react";
-import { C_Collapsible, C_SVG } from "../";
+import { C_Collapsible, C_ContextMenu, C_SVG } from "../";
 import C_List_Task from "./listTask";
 import C_List_NewTaskForm from "./newTaskForm";
 import { Task } from "../../utils/schemas";
 import { useIndexedDB } from "../../hooks";
 import { getDataFromForm } from "../../utils/util";
 
-const C_List_Status = ({ project, status, taskList, onTaskStatusChange, onSelectTask, onDeselectTask }) => {
+const C_List_Status = ({status, statusList, taskList, selectedTasks, addTask, updateTask, removeTask, selectTask, deselectTask }) => {
 
-    const { id, name, color } = status;
-    
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
-    const [tasks, setTasks] = useState(undefined);
-    
+
     const db = useIndexedDB();
-
-    useEffect(() => {
-        setIsCollapsed(taskList.length === 0 || false);
-    }, [status])
-
-    useEffect(() => {
-        filterTasks(project.tasks);
-    }, [project]);
-
-    useEffect(() => {
-        filterTasks(taskList);
-    }, [taskList])
-
-    const filterTasks = (_tasks) => {
-        const filteredTasks = _tasks.filter((_task) => id === _task.status);
-        setTasks([...filteredTasks]);
-        setIsCollapsed(!filteredTasks.length);
-    }
 
     const addTaskToStatus = (event) => {
         event.preventDefault();
-
         const { taskName } = getDataFromForm(event.currentTarget);
+        const newTask = new Task({ name: taskName, status: status.id });
 
-        const task = new Task({ name: taskName, status: status.id });
-
-        db.add('tasks', {...task}).then(() => {
-            db.update('projects', { ...project, tasks: [...tasks.map(task => task.id), task.id] }).then(() => {
-                setTasks([...tasks, task]);
-                setIsAddingTask(false);
-                if (isCollapsed) setIsCollapsed(false);
-            });
-        });
-    }
-
-    const removeTaskFromStatus = (task) => {
-        for (let i = 0; i < tasks.length; i++) {
-            if (tasks[i].id === task.id) {
-                tasks.splice(i, 1);
-                setTasks([...tasks]);
-                return;
-            }
-        }
+        db.add('tasks', newTask).then(() => {
+            addTask(newTask);
+            setIsAddingTask(false);
+        })
     }
 
     return <section className="project-status">
-        <div className="project-status-header flex-row">
-            <button className={`expandStatusBtn ${isCollapsed ? 'collapsed' : ''}`} onClick={() => { setIsCollapsed(!isCollapsed); }} >
-                <C_SVG sourceURL="/chevron-up.svg" size="1rem" color="var(--color-text)"/>
-            </button>
-            <h3 style={{ color: color }}>{name}</h3>
+        <C_ContextMenu options={[]}>
+            <div className="project-status-header flex-row">
+                <button className={`expandStatusBtn ${isCollapsed ? 'collapsed' : ''}`} onClick={() => { setIsCollapsed(!isCollapsed); }} >
+                    <C_SVG sourceURL="/chevron-up.svg" size="1rem" color="var(--color-text)"/>
+                </button>
+                <h3 style={{ color: status.color }}>{status.name}</h3>
 
-            {
-                tasks && tasks.length && isCollapsed ? <h6 className="project-status-taskCount">{tasks.filter(task => task.status === id).length} tasks</h6> :
-                    <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
-                        <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
-                        <h6>New Task</h6>
-                    </button>
-            }
-        </div>
-        <C_Collapsible id={id} isCollapsed={isCollapsed}>
+                {
+                    taskList && taskList.length && isCollapsed ? <h6 className="project-status-taskCount">{taskList.filter(task => task.status === id).length} tasks</h6> :
+                        <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
+                            <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
+                            <h6>New Task</h6>
+                        </button>
+                }
+            </div>
+        </C_ContextMenu>
+        <C_Collapsible id={status.id} isCollapsed={isCollapsed}>
             <ul className="project-status-items flex-column">
                 {isAddingTask && <C_List_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }}/>}
-                {tasks && tasks.map(task => {
+                {taskList && taskList.map(task => {
                     return <C_List_Task
                         key={task.id}
-                        taskData={task}
-                        color={color}
-                        project={project}
-                        taskList={tasks}
-                        removeTaskFromStatus={removeTaskFromStatus}
-                        changeTaskStatus={onTaskStatusChange}
-                        onSelectTask={onSelectTask}
-                        onDeselectTask={onDeselectTask}
+                        statusList={statusList}
+                        task={task}
+                        color={status.color}
+                        selected={selectedTasks.includes(task.id)}
+                        updateTask={updateTask}
+                        removeTask={removeTask}
+                        selectTask={selectTask}
+                        deselectTask={deselectTask}
                     />;
                 })}
             </ul>
         </C_Collapsible>
-        
     </section>
 }
 

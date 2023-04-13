@@ -1,30 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import C_List_Status from "./listStatus";
 import './projectList.css';
 import C_Dropdown from "../dropdown/dropdown";
 import { useIndexedDB } from "../../hooks";
 
-const C_ProjectList = ({ project, taskIDList, statusList, taskList }) => {
+const C_ProjectList = ({ project, onProjectUpdate }) => {
 
-    const [viewedTasks, setViewedTasks] = useState([...taskList]);
     const [selectedTasks, setSelectedTasks] = useState([]);
 
     const db = useIndexedDB();
 
-    const onTaskStatusChange = (task) => {
-        for (let i = 0; i < viewedTasks.length; i++) {
-            if (viewedTasks[i].id === task.id) {
-                viewedTasks.splice(i, 1, task);
-                setViewedTasks([...viewedTasks]);
-            }
-        }
+    const addTask = (task) => {
+        onProjectUpdate({ tasks: [...project.tasks, task] });
     }
 
-    const onSelectTask = (task) => { 
+    const updateTask = (task) => {
+        onProjectUpdate({
+            tasks: project.tasks.map(_task => {
+                if (_task.id === task.id)
+                return task;
+                
+                return _task;
+            })
+        });
+    }
+
+    const removeTask = (task) => {
+        onProjectUpdate({ tasks: project.tasks.filter(_task => _task.id !== task.id) });
+    }
+
+    const selectTask = (task) => { 
         setSelectedTasks([...selectedTasks, task]);
     }
 
-    const onDeselectTask = (task) => {
+    const deselectTask = (task) => {
         for (let i = 0; i < selectedTasks.length; i++) {
             if (selectedTasks[i].id === task.id) {
                 selectedTasks.splice(i, 1);
@@ -34,14 +43,19 @@ const C_ProjectList = ({ project, taskIDList, statusList, taskList }) => {
     }
 
     const moveSelectedTasksToStatus = (newStatus) => {
-        const updatedTasks = [];
+
+        const newProjectTasks = [...project.tasks];
         for (let task of selectedTasks) {
-            const newTask = { ...task, status: newStatus };
-            updatedTasks.push(newTask);
-            onTaskStatusChange(newTask);
+            for (let i = 0; i < newProjectTasks.length; i++) {
+                if (newProjectTasks[i].id === task.id) {
+                    newProjectTasks.splice(i, 1, { ...task, status: newStatus });
+                    break;
+                }
+            }
         }
 
-        db.updateMany('tasks', updatedTasks).then(() => {
+        db.updateMany('tasks', newProjectTasks).then(() => {
+            onProjectUpdate({ tasks: newProjectTasks });
             setSelectedTasks([]);
         });
     }
@@ -50,17 +64,11 @@ const C_ProjectList = ({ project, taskIDList, statusList, taskList }) => {
         
         const selectedIDs = selectedTasks.map(({ id }) => id);
 
-        const newViewedTasks = viewedTasks.filter(({id}) => !selectedIDs.includes(id) );
-        const newProjectTasks = taskIDList.filter(id => !selectedIDs.includes(id) );
+        const newProjectTasks = project.tasks.filter((task) => !selectedIDs.includes(task.id));
 
         db.removeMany('tasks', selectedIDs).then(() => {
-            db.update('projects', {
-                ...project,
-                tasks: [...newProjectTasks]
-            }).then(() => {
-                setSelectedTasks([]);
-                setViewedTasks(newViewedTasks);
-            });
+            onProjectUpdate({ tasks: newProjectTasks });
+            setSelectedTasks([]);
         });
     }
 
@@ -69,7 +77,7 @@ const C_ProjectList = ({ project, taskIDList, statusList, taskList }) => {
             id: 'selected-moveto',
             title: 'Move To',
             color: 'var(--color-text)',
-            options: statusList.map(status => {
+            options: project.statuses.map(status => {
                 return {
                     id: 'selected-moveto' + status.id,
                     title: status.name,
@@ -90,17 +98,21 @@ const C_ProjectList = ({ project, taskIDList, statusList, taskList }) => {
         <section className="project-list-view flex-column">
             <div className="project-list-header flex-row">
                 <C_Dropdown title={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} selected`} options={selectedTaskOptions} />
-                
             </div>
-            {statusList && statusList.map((status) => <C_List_Status
-                key={status.id}
-                project={project}
-                status={status}
-                taskList={viewedTasks}
-                onTaskStatusChange={onTaskStatusChange}
-                onSelectTask={onSelectTask}
-                onDeselectTask={onDeselectTask}
-            />)}
+            {
+                project.statuses && project.statuses.map((status) => <C_List_Status
+                    key={status.id}
+                    status={status}
+                    statusList={project.statuses}
+                    taskList={project.tasks.filter((task) => task.status === status.id)}
+                    selectedTasks={selectedTasks.map(({id}) => id)}
+                    addTask={addTask}
+                    updateTask={updateTask}
+                    removeTask={removeTask}
+                    selectTask={selectTask}
+                    deselectTask={deselectTask}
+                />)
+            }
         </section>
     </>;
 }

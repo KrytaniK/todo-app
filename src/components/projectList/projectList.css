@@ -8,20 +8,27 @@
 
 .project-list-header {
     padding: .25rem 0;
-    justify-content: end;
+    justify-content: space-between;
     align-items: center;
     gap: 8px
 }
 
 /* Status Styling */
 
-.project-status-header, .project-status-items {
+.project-status-items {
     padding: 8px 0;
 }
 
 .project-status-header {
     align-items: center;
     gap: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+}
+
+.project-status-header:hover {
+    background-color: #373737;
 }
 
 .project-status-items {

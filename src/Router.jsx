@@ -9,17 +9,12 @@ export const router = createBrowserRouter([
         id: 'app',
         path: '/',
         element: <App />,
-        loader: async ({params}) => {
+        loader: async () => {
 
             const db = new Database('todo');
             const projects = await db.store('projects').getAll();
 
-            const lastViewedProject = localStorage.getItem('lastViewedProject') || projects[0].id;
-
-            if (!params.projectID && lastViewedProject)
-                return redirect(`/projects/${lastViewedProject}`);
-
-            return { projects, currentProject: lastViewedProject };
+            return { projects };
         },
         children: [
             {
@@ -32,25 +27,18 @@ export const router = createBrowserRouter([
                     const db = new Database('todo');
                     const project = await db.store('projects').get(projectID);
 
-                    if (!project)
+                    if (!project) {
                         return redirect('/');
+                    }
 
-                    const newTasks = [];
+                    const filledTasks = [];
                     for (let taskID of project.tasks) {
                         const task = await db.store('tasks').get(taskID);
-                        if (!task) {
-                            console.log(taskID, "was not found!!!!!", taskID);
-                            console.log("Before", project.tasks);
-                            project.tasks.splice(project.tasks.indexOf(taskID), 1);
-                            console.log("AFter", project.tasks);
-                            await db.store('projects').update({ ...project, tasks: [...project.tasks] });
-                        }
-                        newTasks.push(task);
+                        filledTasks.push(task);
                     }
 
                     return {
-                        project: { ...project, tasks: newTasks },
-                        taskIDList: project.tasks
+                        project: { ...project, tasks: filledTasks }
                     };
                 }
             }
