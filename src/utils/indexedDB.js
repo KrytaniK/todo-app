@@ -48,6 +48,7 @@ export default class Database {
                 const store = transaction.objectStore(this.currentObjectStoreName);
                 const getRequest = store.get(itemID);
                 getRequest.onsuccess = event => resolve(event.target.result);
+                getRequest.onerror = event => reject(event.target.error);
             })
         })
     }

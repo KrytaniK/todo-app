@@ -6,8 +6,6 @@ import { getDataFromForm } from "../../utils/util";
 const C_TaskModal = ({ control, task, onSaveTask }) => {
 
     const saveTask = (event) => {
-
-        console.log(event);
         event.preventDefault();
 
         const { newTaskName } = getDataFromForm(event.currentTarget);

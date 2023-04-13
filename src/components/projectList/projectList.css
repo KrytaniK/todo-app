@@ -21,12 +21,17 @@
 
 .project-status-header, .project-status-items {
     padding: 8px 0;
-    gap: 8px;
+}
+
+.project-status-header {
+    align-items: center;
+    gap: 16px;
 }
 
 .project-status-items {
     overflow: hidden;
     min-height: 2rem;
+    gap: 8px;
 }
 
 .expandStatusBtn, .newTaskBtn {
@@ -43,10 +48,13 @@
     transition: transform .5s ease-in-out;
 }
 
+.expandStatusBtn.collapsed {
+    transform: rotate(180deg);
+}
+
 .project-status-taskCount {
     flex: 1;
     align-items: center;
-    padding-left: .5rem;
     opacity: 50%;
 }
 

@@ -15,7 +15,6 @@ if (!JSON.parse(localStorage.getItem('isFirstLoad'))) {
   localStorage.setItem('isFirstLoad', true);
 }
 
-
 createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
     <RouterProvider router={router} />

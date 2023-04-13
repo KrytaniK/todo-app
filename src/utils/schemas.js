@@ -25,7 +25,6 @@ export class Task {
         this.name = options.name || "New Task";
         this.description = options.description || "";
         this.status = options.status;
-        this.project = options.project;
         this.priority = options.priority || "Low";
         this.dueDate = options.dueDate || 'unscheduled';
     }

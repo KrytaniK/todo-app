@@ -1,120 +1,96 @@
-import React, { useRef, useState } from "react";
-import { C_Collapsible, C_SVG, C_TaskModal } from "../";
-import C_List_NewTaskForm from "./newTaskForm";
-import { Task, ContextMenuItem } from "../../utils/schemas";
-import { useIndexedDB, useModal, useStatus } from "../../hooks";
+import React, { useEffect, useRef, useState } from "react";
+import { C_Collapsible, C_SVG } from "../";
 import C_List_Task from "./listTask";
+import C_List_NewTaskForm from "./newTaskForm";
+import { Task } from "../../utils/schemas";
+import { useIndexedDB } from "../../hooks";
 import { getDataFromForm } from "../../utils/util";
+import { useRouteLoaderData } from "react-router-dom";
 
-const C_List_Status = ({ status: { id, name, color }, taskList, statusList, taskActions }) => {
+const C_List_Status = ({ status, taskList, onTaskStatusChange }) => {
 
+    const { id, name, color } = status;
+    
+    const { project } = useRouteLoaderData('project');
+    
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isAddingTask, setIsAddingTask] = useState(false);
+    const [tasks, setTasks] = useState(undefined);
+    
     const db = useIndexedDB();
-    const status = useStatus(id, taskList, db);
-    const { selectTask, deselectTask } = taskActions;
-    
-    const [addingTask, setAddingTask] = useState(false);
-    const [renameIndex, setRenameIndex] = useState(-1);
-    const [viewedTask, setViewedTask] = useState(undefined);
-    const [collapsed, setCollapsed] = useState(false);
-    
-    const taskModalControl = useModal();
-    const collapseRef = useRef(undefined);
 
-    const onCreateTask = (event) => {
-        event.preventDefault();
+    useEffect(() => {
+        setIsCollapsed(false);
+    }, [status])
 
-        const { taskName } = getDataFromForm(event.currentTarget);
-        const task = new Task({ name: taskName, status: id });
-        taskActions.addTask(task);
-        status.addTask(task);
-        setAddingTask(false);
-    }
+    useEffect(() => {
+        setTasks([...project.tasks]);
+    }, [project]);
 
-    const onRenameTask = (event, task) => {
+    useEffect(() => {
+        setTasks([...taskList]);
+    }, [taskList])
+
+    const addTaskToStatus = (event) => {
         event.preventDefault();
 
         const { taskName } = getDataFromForm(event.currentTarget);
 
-        const updatedTask = { ...task, name: taskName };
-        taskActions.updateTask(updatedTask);
-        status.updateTask(updatedTask);
-        setRenameIndex(-1);
+        const task = new Task({ name: taskName, status: status.id });
+        console.log(task);
+
+        db.add('tasks', {...task}).then(() => {
+            db.update('projects', { ...project, tasks: [...tasks.map(task => task.id), task.id] }).then(() => {
+                setTasks([...tasks, task]);
+                setIsAddingTask(false);
+            });
+        });
     }
 
-    const onSaveTask = (task) => {
-        taskActions.updateTask(task);
-        status.updateTask(task);
+    const removeTaskFromStatus = (task) => {
+        for (let i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === task.id) {
+                tasks.splice(i, 1);
+                setTasks([...tasks]);
+                return;
+            }
+        }
     }
 
-    const generateTaskContextOptions = (task, taskIndex) => {
-        return [
-            new ContextMenuItem({
-                title: 'View / Edit',
-                color: 'var(--color-text)',
-                callback: () => { setViewedTask(task); taskModalControl.toggle(); }
-            }),
-            new ContextMenuItem({
-                title: 'Move To',
-                color: 'var(--color-text)',
-                subOptions: [
-                    new ContextMenuItem({
-                        title: 'Status',
-                        color: 'var(--color-text)',
-                        subOptions: statusList.map(_status => new ContextMenuItem({
-                            title: _status.name,
-                            color: 'var(--color-text)',
-                            callback: () => { taskActions.moveTask(task, _status.id); }
-                        }))
-                    })
-                ]
-            }),
-            new ContextMenuItem({ title: 'Rename', color: 'var(--color-text)', callback: () => { setRenameIndex(taskIndex); } }),
-            new ContextMenuItem({ title: 'Delete Task', color: 'var(--color-error)', callback: () => { taskActions.deleteTask(task); }})
-        ]
-    }
-
-    return status && <section className="project-status">
+    return <section className="project-status">
         <div className="project-status-header flex-row">
-            <button
-                className="expandStatusBtn"
-                ref={collapseRef}
-                onClick={() => { setCollapsed(!collapsed) }}
-                style={{transform: collapsed ? "none" : "rotate(-180deg)"}}
-            >
-                <C_SVG sourceURL="/chevron-down.svg" size="1rem" color="var(--color-text)"/>
+            <button className={`expandStatusBtn ${isCollapsed ? 'collapsed' : ''}`} onClick={() => { setIsCollapsed(!isCollapsed); }} >
+                <C_SVG sourceURL="/chevron-up.svg" size="1rem" color="var(--color-text)"/>
             </button>
             <h3 style={{ color: color }}>{name}</h3>
-            {!collapsed ? <button className="newTaskBtn flex-row" onClick={() => { setAddingTask(true); }}>
-                <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
-                <h6>New Task</h6>
-            </button> : <p className="small flex-row project-status-taskCount">{status.tasks.length} tasks</p>}
-            <div className="status-descriptors flex-row">
-            </div>
-        </div>
-        <C_Collapsible id={id} ref={collapseRef}>
-            <ul className="project-status-items flex-column">
-                {addingTask && <C_List_NewTaskForm onSubmit={onCreateTask} onCancel={() => { setAddingTask(false); }} />}
-                {status.tasks && status.tasks.map((task, index) => {
-                    if (renameIndex === index)
-                        return <C_List_NewTaskForm
-                            key={task.id}
-                            placeholderText={task.name}
-                            onSubmit={(e) => { onRenameTask(e, task); }}
-                            onCancel={() => { setRenameIndex(-1); }}
-                        />
 
+            {
+                isCollapsed ? <h6 className="project-status-taskCount">{tasks.filter(task => task.status === id).length} tasks</h6> :
+                    <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
+                        <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
+                        <h6>New Task</h6>
+                    </button>
+            }
+        </div>
+        <C_Collapsible id={id} isCollapsed={isCollapsed}>
+            <ul className="project-status-items flex-column">
+                {isAddingTask && <C_List_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }}/>}
+                {tasks && tasks.map(task => {
+                    if (task.status !== id) return null;
+                    
                     return <C_List_Task
                         key={task.id}
-                        task={task}
+                        taskData={task}
                         color={color}
-                        onSelect={selectTask}
-                        onDeselect={deselectTask}
-                        contextOptions={generateTaskContextOptions(task, index)}
+                        project={project}
+                        taskList={tasks}
+                        removeTaskFromStatus={removeTaskFromStatus}
+                        changeTaskStatus={onTaskStatusChange}
                     />;
                 })}
             </ul>
         </C_Collapsible>
-        <C_TaskModal control={taskModalControl} task={viewedTask} onSaveTask={onSaveTask} />
+        
     </section>
 }
 
