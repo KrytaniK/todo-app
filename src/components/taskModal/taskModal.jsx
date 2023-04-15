@@ -3,14 +3,14 @@ import { C_Modal, C_SVG } from "../";
 import './taskModal.css';
 import { getDataFromForm } from "../../utils/util";
 
-const C_TaskModal = ({ control, task, onSaveTask }) => {
+const C_TaskModal = ({ control, task, onSave }) => {
 
     const saveTask = (event) => {
         event.preventDefault();
 
         const { newTaskName } = getDataFromForm(event.currentTarget);
 
-        onSaveTask({
+        onSave({
             ...task,
             name: newTaskName
         });

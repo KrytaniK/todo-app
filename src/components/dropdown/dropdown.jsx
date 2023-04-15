@@ -3,7 +3,7 @@ import './dropdown.css';
 import C_SVG from "../svg";
 import C_Menu from "../menu/menu";
 
-const C_Dropdown = ({ title, options = [] }) => {
+const C_Dropdown = ({ title, options = [], alignment }) => {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -24,6 +24,10 @@ const C_Dropdown = ({ title, options = [] }) => {
 
     const toggle = (event) => {
         event.stopPropagation();
+
+        if (!options || options.length < 1)
+            return;
+
         setIsOpen(!isOpen);
     }
 
@@ -32,7 +36,7 @@ const C_Dropdown = ({ title, options = [] }) => {
             <p>{title}</p>
             <C_SVG sourceURL="/chevron-down.svg" size="1rem" color="var(--color-text)"/>
         </button>
-        <C_Menu isOpen={isOpen} onSelectItem={toggle} pos={{ right: 8, top: '100%' }} options={options} />
+         <C_Menu isOpen={isOpen} onSelectItem={toggle} pos={{ right: 8, top: '100%' }} options={options} alignment={alignment} />
     </div>
 }
 

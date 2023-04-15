@@ -6,9 +6,11 @@ import { useIndexedDB } from "../../hooks";
 
 const P_Project = () => {
 
-    const { project } = useLoaderData();
+    const { project, statuses } = useLoaderData();
     
     const [projectData, setProjectData] = useState(project);
+    const [statusList, setStatusList] = useState(statuses);
+    
     const [view, setView] = useState('List');
 
     const db = useIndexedDB();
@@ -22,11 +24,20 @@ const P_Project = () => {
         const newProjectData = { ...projectData, ...updatedData };
         const newTaskIDList = newProjectData.tasks.map(task => task.id);
 
+        const newStatuses = newProjectData.statuses.filter(status => {
+            for (let _status of statusList) {
+                if (_status.id === status.id) return false;
+            }
+
+            return true;
+        });
+
         db.update('projects', {
             ...newProjectData,
             tasks: [...newTaskIDList]
         }).then(() => {
             setProjectData(newProjectData);
+            setStatusList([...statusList, ...newStatuses]);
         });
     }
 
@@ -44,8 +55,19 @@ const P_Project = () => {
                 </button>
             </div>
         </section>
-        {view === 'List' && <C_ProjectList project={projectData} onProjectUpdate={onProjectUpdate}/> }
-        {/* {view === 'Board' && <C_ProjectBoard statuses={_project.statuses} taskList={project.taskList} taskActions={project.taskActions} /> } */}
+        {
+            view === 'List' && <C_ProjectList
+                project={projectData}
+                statuses={statusList.filter(status => {
+                    for (let _status of projectData.statuses) {
+                        if (_status.id === status.id) return false;
+                    }
+                    return true;
+                })} 
+                onProjectUpdate={onProjectUpdate}
+            />
+        }
+        {/* {view === 'Board' && <C_ProjectBoard project={projectData} onProjectUpdate={onProjectUpdate} /> } */}
     </div>;
 }
 

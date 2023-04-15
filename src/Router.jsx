@@ -37,8 +37,11 @@ export const router = createBrowserRouter([
                         filledTasks.push(task);
                     }
 
+                    const statuses = await db.store('statuses').getAll();
+
                     return {
-                        project: { ...project, tasks: filledTasks }
+                        project: { ...project, tasks: filledTasks },
+                        statuses
                     };
                 }
             }

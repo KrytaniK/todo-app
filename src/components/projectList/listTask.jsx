@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { C_ContextMenu, C_TaskModal } from '../';
 import { useModal } from "../../hooks";
 import { ContextMenuItem } from "../../utils/schemas";
@@ -66,12 +66,14 @@ const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask
             title: 'Delete Task',
             color: 'var(--color-error)',
             callback: () => { 
-                db.remove('tasks', task.id).then(() => { removeTask(task); })
+                db.remove('tasks', task.id).then(() => { removeTask(task); if (selected) deselectTask(task); })
             }
         })
     ]
 
-    return task && isRenaming ? <C_List_NewTaskForm placeholderText={task.name} onSubmit={onRenameTask} onCancel={() => { setIsRenaming(false); }} /> : <>
+    if (isRenaming) return <C_List_NewTaskForm placeholderText={task.name} onSubmit={onRenameTask} onCancel={() => { setIsRenaming(false); }} />;
+
+    return task && <>
         <C_ContextMenu options={taskContextOptions}>
             <div className="project-listTask flex-row" onClick={onSelectTask}>
                 <div
@@ -83,7 +85,7 @@ const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask
                 </div>
             </div>
         </C_ContextMenu>
-        <C_TaskModal control={_modal} task={task} onSaveTask={updateTask} />
+        <C_TaskModal control={_modal} task={task} onSave={updateTask} />
     </>;
 }
 

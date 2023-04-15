@@ -12,6 +12,16 @@ const C_Menu = ({ isOpen, options, pos, onSelectItem, alignment, isSubMenu }) =>
         let rect = menuRef.current.getBoundingClientRect();
         
         switch (alignment) {
+            case 'parent-left': {
+                menuRef.current.style.left = '0px';
+                menuRef.current.style.top = '100%';
+                break;
+            }
+            case 'parent-right': {
+                menuRef.current.style.right = '0px';
+                menuRef.current.style.top = '100%';
+                break;
+            }
             case 'left': {
                 menuRef.current.style.left = parseInt(menuRef.current.style.left) - rect.width + 'px';
                 break;
@@ -55,6 +65,8 @@ const C_Menu = ({ isOpen, options, pos, onSelectItem, alignment, isSubMenu }) =>
 
         // Off screen, top
         if (yMin < 0) {
+            if (alignment !== 'bottom' || alignment !== 'bottomLeft')
+                return;
             menuRef.current.style.transform += `translateY(${-yMin + margin}px)`;
         }
 
@@ -66,7 +78,7 @@ const C_Menu = ({ isOpen, options, pos, onSelectItem, alignment, isSubMenu }) =>
     }, [isOpen, pos]);
 
     return isOpen && <ul className="menu" style={{...pos}} ref={menuRef}>
-        {options.map(option => <Item key={option.id} option={option} onSelect={onSelectItem} subMenuAlign={alignment}/>)}
+        {options.map(option => <Item key={option.id} option={option} onSelect={onSelectItem} subMenuAlign={alignment} /> )}
     </ul>
 }
 

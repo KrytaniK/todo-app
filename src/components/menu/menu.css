@@ -4,6 +4,7 @@
     border: 2px solid #373737;
     border-radius: var(--border-radius);
     z-index: 1000;
+    min-width: fit-content;
 }
 .menu-item {
     position: relative;

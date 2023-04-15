@@ -2,13 +2,35 @@ import React, { useState } from "react";
 import C_List_Status from "./listStatus";
 import './projectList.css';
 import C_Dropdown from "../dropdown/dropdown";
-import { useIndexedDB } from "../../hooks";
+import { useIndexedDB, useModal } from "../../hooks";
+import C_StatusModal from "../statusModal/statusModal";
 
-const C_ProjectList = ({ project, onProjectUpdate }) => {
+const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
 
     const [selectedTasks, setSelectedTasks] = useState([]);
 
     const db = useIndexedDB();
+    const newStatusModal = useModal();
+
+    const addStatus = (status) => {
+        onProjectUpdate({ statuses: [...project.statuses, status] });
+    }
+
+    const saveStatus = (status) => {
+        const newStatuses = [...project.statuses];
+        for (let i = 0; i < newStatuses.length; i++) {
+            if (newStatuses[i].id === status.id) {
+                newStatuses.splice(i, 1, status);
+                break;
+            }
+        }
+
+        onProjectUpdate({ statuses: [...newStatuses] });
+    }
+
+    const removeStatus = (status) => {
+        onProjectUpdate({ statuses: project.statuses.filter(_status => _status.id !== status.id) });
+    }
 
     const addTask = (task) => {
         onProjectUpdate({ tasks: [...project.tasks, task] });
@@ -72,6 +94,23 @@ const C_ProjectList = ({ project, onProjectUpdate }) => {
         });
     }
 
+    const newStatusOptions = [
+        ...statuses.map(status => {
+            return {
+                id: `new-status-${status.id}`,
+                title: status.name,
+                color: 'var(--color-text)',
+                callback: () => { addStatus(status); }
+            }
+        }),
+        {
+            id: 'create-new-status',
+            title: 'Create A New Status',
+            color: 'var(--color-secondary)',
+            callback: newStatusModal.toggle
+        }
+    ]
+
     const selectedTaskOptions = [
         {
             id: 'selected-moveto',
@@ -97,15 +136,19 @@ const C_ProjectList = ({ project, onProjectUpdate }) => {
     return <>
         <section className="project-list-view flex-column">
             <div className="project-list-header flex-row">
-                <C_Dropdown title={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} selected`} options={selectedTaskOptions} />
+                <C_Dropdown title="Add New Status" options={newStatusOptions} alignment="parent-left"/>
+                <C_Dropdown title={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} selected`} options={selectedTaskOptions} alignment="parent-right"/>
             </div>
+
             {
                 project.statuses && project.statuses.map((status) => <C_List_Status
                     key={status.id}
                     status={status}
                     statusList={project.statuses}
                     taskList={project.tasks.filter((task) => task.status === status.id)}
-                    selectedTasks={selectedTasks.map(({id}) => id)}
+                    selectedTasks={selectedTasks.map(({ id }) => id)}
+                    saveStatus={saveStatus}
+                    removeStatus={removeStatus}
                     addTask={addTask}
                     updateTask={updateTask}
                     removeTask={removeTask}
@@ -114,6 +157,7 @@ const C_ProjectList = ({ project, onProjectUpdate }) => {
                 />)
             }
         </section>
+        <C_StatusModal control={newStatusModal} onSave={addStatus} />
     </>;
 }
 

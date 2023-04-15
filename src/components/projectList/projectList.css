@@ -31,6 +31,29 @@
     background-color: #373737;
 }
 
+.project-list-status-new {
+    gap: 8px;
+    align-items: center;
+}
+
+.project-list-status-new-inputs {
+    background-color: #1f1f1f;
+    padding: 8px 16px;
+    flex: 1;
+    gap: 16px;
+    border-radius: var(--border-radius);
+}
+
+.new-list-status-btn {
+    align-items: center;
+    gap: 8px;
+    opacity: 50%;
+}
+
+.new-list-status-btn:hover {
+    opacity: 100%;
+}
+
 .project-status-items {
     overflow: hidden;
     min-height: 2rem;

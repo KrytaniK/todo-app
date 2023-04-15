@@ -9,9 +9,9 @@ import { Status } from './utils/schemas';
 
 if (!JSON.parse(localStorage.getItem('isFirstLoad'))) {
   const db = new Database('todo');
-  db.store('statuses').add(new Status({ id: '1', name: 'Waiting', color: 'white', isTemplate: true }));
-  db.store('statuses').add(new Status({ id: '2', name: 'In Progress', color: 'white', isTemplate: true }));
-  db.store('statuses').add(new Status({ id: '3', name: 'Done', color: 'white', isTemplate: true }));
+  db.store('statuses').add(new Status({ id: '1', name: 'Waiting', color: '#ffffff', isTemplate: true }));
+  db.store('statuses').add(new Status({ id: '2', name: 'In Progress', color: '#ffffff', isTemplate: true }));
+  db.store('statuses').add(new Status({ id: '3', name: 'Done', color: '#ffffff', isTemplate: true }));
   localStorage.setItem('isFirstLoad', true);
 }
 
