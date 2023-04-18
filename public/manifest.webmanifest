@@ -1,0 +1,16 @@
+{
+    "name": "KrytaniK's Progressive Todo Application",
+    "short_name": "Kry's Todo App",
+    "description": "A simple to-do application that keeps track of tasks sorted by project",
+    "icons": [
+        {
+            "src": "/favicon-light.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "display": "standalone",
+    "start_url": "/",
+    "theme_color": "#171717",
+    "background_color": "#171717"
+}

@@ -8,10 +8,22 @@ const P_Project = () => {
 
     const { project, statuses } = useLoaderData();
     
-    const [projectData, setProjectData] = useState(project);
-    const [statusList, setStatusList] = useState(statuses);
-    
+    const [projectData, setProjectData] = useState(undefined);
+    const [statusList, setStatusList] = useState(undefined);
     const [view, setView] = useState('List');
+
+    useEffect(() => {
+        if (!project) return;
+
+        setProjectData({ ...project });
+    }, [project]);
+
+    useEffect(() => {
+        if (!statuses) return;
+        
+        setStatusList([...statuses]);
+    }, [statuses]);
+    
 
     const db = useIndexedDB();
 
@@ -41,7 +53,7 @@ const P_Project = () => {
         });
     }
 
-    return project && <div className="project-wrapper flex-column">
+    return projectData && statusList && <div className="project-wrapper">
         <section className="project-header flex-row">
             <div className="project-name flex">
                 <h1>{project.name}</h1>
@@ -51,7 +63,7 @@ const P_Project = () => {
                     <p>List View</p>
                 </button>
                 <button className={`project-tab ${view === "Board" ? "selected" : ""}`}  onClick={() => { setView('Board'); }}>
-                    Board
+                    <p>Board View</p>
                 </button>
             </div>
         </section>
@@ -67,7 +79,18 @@ const P_Project = () => {
                 onProjectUpdate={onProjectUpdate}
             />
         }
-        {/* {view === 'Board' && <C_ProjectBoard project={projectData} onProjectUpdate={onProjectUpdate} /> } */}
+        {
+            view === 'Board' && <C_ProjectBoard
+                project={projectData}
+                statuses={statusList.filter(status => {
+                    for (let _status of projectData.statuses) {
+                        if (_status.id === status.id) return false;
+                    }
+                    return true;
+                })}
+                onProjectUpdate={onProjectUpdate}
+            />
+        }
     </div>;
 }
 

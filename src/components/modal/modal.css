@@ -9,7 +9,7 @@
 }
 
 .modal-content {
-    background-color: var(--color-background);
+    background-color: #1f1f1f;
     border: 2px solid #373737;
     border-radius: var(--border-radius);
     padding: 16px 32px;

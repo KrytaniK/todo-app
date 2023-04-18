@@ -5,6 +5,7 @@ export class Project {
         this.id = short.generate();
         this.name = options.name;
         this.statuses = options.statuses || [];
+        this.statusOrder = options.statusOrder || [];
         this.tasks = options.tasks || [];
     }
 }
@@ -14,6 +15,7 @@ export class Status {
         this.id = options?.id || short.generate();
         this.name = options?.name || 'New Status';
         this.color = options?.color || 'white';
+        this.taskIDs = [];
         if (options?.isTemplate)
             this.isTemplate = options.isTemplate;
     }

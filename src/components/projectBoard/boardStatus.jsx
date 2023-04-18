@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { C_Collapsible, C_ContextMenu, C_SVG, C_StatusModal } from "../";
-import C_List_Task from "./listTask";
-import C_List_NewTaskForm from "./newTaskForm";
-import { Task } from "../../utils/schemas";
+import { C_ContextMenu, C_Collapsible, C_SVG, C_StatusModal } from '../';
 import { useIndexedDB, useModal } from "../../hooks";
+import C_Board_NewTaskForm from "./newTaskForm";
 import { getDataFromForm } from "../../utils/util";
+import { Task } from "../../utils/schemas";
+import C_Board_Task from "./boardTask";
 
-const C_List_Status = ({status, statusList, taskList, selectedTasks, saveStatus, removeStatus, addTask, updateTask, removeTask, selectTask, deselectTask }) => {
-
+const C_Board_Status = ({ status, statusList, taskList, selectedTasks, saveStatus, removeStatus, addTask, updateTask, removeTask, selectTask, deselectTask }) => {
+    
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
 
@@ -46,30 +46,23 @@ const C_List_Status = ({status, statusList, taskList, selectedTasks, saveStatus,
         }
     ]
 
-    return <section className="project-status">
+    return <section className="project-board-status flex-column">
         <C_ContextMenu options={statusModalOptions}>
-            <div className="project-status-header flex-row">
+            <div className="project-board-status-header flex-row" style={{borderBottom: `2px solid ${status.color}`}}>
+                <h3 className="project-board-status-name">{status.name}</h3>
+                <p className="small project-board-status-taskCount">{taskList.length} task{taskList.length === 1 ? '' : 's'}</p>
                 <button aria-label="Status Expand Button" className={`expandStatusBtn ${isCollapsed ? 'collapsed' : ''}`} onClick={() => { setIsCollapsed(!isCollapsed); }} >
-                    <C_SVG sourceURL="/chevron-up.svg" size="1rem" color="var(--color-text)"/>
+                    <C_SVG sourceURL="/chevron-down.svg" size="1.25rem" color="var(--color-text)"/>
                 </button>
-                <div className="project-list-status-name" style={{ color: status.color }}>{status.name}</div>
-
-                {
-                    isCollapsed ? <p className="project-status-taskCount small">{taskList.length} task{taskList.length === 1 ? '' : 's'}</p> :
-                        <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
-                            <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
-                            <p className="small">New Task</p>
-                        </button>
-                }
             </div>
         </C_ContextMenu>
-        <C_Collapsible id={status.id} isCollapsed={isCollapsed}>
-            <ul className="project-status-items flex-column">
+        <C_Collapsible id={status.id} isCollapsed={isCollapsed && !isAddingTask} enableScroll={true}>
+            <ul className="project-board-status-items flex-column">
                 
-                {isAddingTask && <C_List_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }} />}
+                {isAddingTask && <C_Board_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }} />}
                 
                 {taskList && taskList.map(task => {
-                    return <C_List_Task
+                    return <C_Board_Task
                         key={task.id}
                         statusList={statusList}
                         task={task}
@@ -83,8 +76,14 @@ const C_List_Status = ({status, statusList, taskList, selectedTasks, saveStatus,
                 })}
             </ul>
         </C_Collapsible>
+        <button className="project-board-status-addNewBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
+            <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
+            <p className="small">
+                New Task
+            </p>
+        </button>
         <C_StatusModal status={status} control={statusModalControl} onSave={onSaveStatus} />
-    </section>
+    </section>;
 }
 
-export default C_List_Status;
+export default C_Board_Status;

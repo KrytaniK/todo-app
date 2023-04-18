@@ -3,54 +3,41 @@
     min-width: 384px;
 }
 
-.tm-header, .tm-name {
+.task-modal label {
+    min-width: 4rem;
+}
+
+.tm-header {
     align-items: center;
 }
 
 .tm-header {
-    justify-content: end;
-}
-
-.tm-name {
     justify-content: space-between;
-    min-height: 2rem;
 }
 
-.savedTaskName {
-    flex: 1;
+.tm-location {
+    opacity: 50%;
 }
 
 .tm-name {
-    flex: 1;
-    gap: 16px;
+    width: 100%;
+    align-items: start;
+    gap: 8px;
 }
 
-.tm-name h2 {
-    flex: 1;
+.tm-name input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.tm-status {
+    gap: 16px;
+    padding: 0 8px;
 }
 
 .tm-actions {
     flex: 1;
     justify-content: end;
-}
-
-#tm-newTaskName-form {
-    flex: 1;
-}
-
-#tm-newTaskName {
-    flex: 1;
-    font-size: 1.25rem;
-    font-weight: 700;
-    opacity: 75%;
-}
-
-#tm-newTaskName:focus {
-    opacity: 100%;
-}
-
-#tm-newTaskName:hover {
-    opacity: 100%;
 }
 
 .tm-saveTask {

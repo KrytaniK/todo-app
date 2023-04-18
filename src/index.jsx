@@ -4,15 +4,10 @@ import { RouterProvider } from 'react-router-dom';
 
 import {router} from './Router';
 import './styles.css';
-import Database from './utils/indexedDB';
-import { Status } from './utils/schemas';
 
-if (!JSON.parse(localStorage.getItem('isFirstLoad'))) {
-  const db = new Database('todo');
-  db.store('statuses').add(new Status({ id: '1', name: 'Waiting', color: '#ffffff', isTemplate: true }));
-  db.store('statuses').add(new Status({ id: '2', name: 'In Progress', color: '#ffffff', isTemplate: true }));
-  db.store('statuses').add(new Status({ id: '3', name: 'Done', color: '#ffffff', isTemplate: true }));
-  localStorage.setItem('isFirstLoad', true);
+// Service Worker Installation
+if ("serviceWorker" in navigator && false) {
+  navigator.serviceWorker.register("/sw.js");
 }
 
 createRoot(document.getElementById('root')).render(

@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { C_ContextMenu, C_TaskModal } from '../';
-import { useModal } from "../../hooks";
-import { ContextMenuItem } from "../../utils/schemas";
-import C_List_NewTaskForm from "./newTaskForm";
+import { useIndexedDB, useModal } from "../../hooks";
 import { getDataFromForm } from "../../utils/util";
-import { useIndexedDB } from "../../hooks";
+import { ContextMenuItem } from "../../utils/schemas";
 
-const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask, selectTask, deselectTask }) => {
+const C_Board_Task = ({ statusList, task, color, selected, updateTask, removeTask, selectTask, deselectTask }) => {
 
     const [isRenaming, setIsRenaming] = useState(false);
     
@@ -71,22 +69,22 @@ const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask
         })
     ]
 
-    if (isRenaming) return <C_List_NewTaskForm placeholderText={task.name} onSubmit={onRenameTask} onCancel={() => { setIsRenaming(false); }} />;
+    if (isRenaming) return <C_Board_NewTaskForm placeholderText={task.name} onSubmit={onRenameTask} onCancel={() => { setIsRenaming(false); }} />;
 
     return task && <li>
         <C_ContextMenu options={taskContextOptions}>
-            <div className="project-listTask flex-row" onClick={onSelectTask}>
-                <div
-                    className="project-task-selector"
-                    style={{ border: selected && `2px solid ${color}`, backgroundColor: selected && color }}
-                />
-                <p>{task.name}</p>
-                <div className="project-listTask-info flex-row">
-                </div>
+            <div className="project-board-task flex-column" onClick={onSelectTask}>
+                <section className="project-board-task-header flex-row">
+                    <div
+                        className="project-task-selector"
+                        style={{ border: selected && `2px solid ${color}`, backgroundColor: selected && color }}
+                    />
+                    <p className="project-board-task-name">{task.name}</p>
+                </section>
             </div>
         </C_ContextMenu>
         <C_TaskModal control={_modal} task={task} statusList={statusList} onSave={updateTask} />
     </li>;
 }
 
-export default C_List_Task;
+export default C_Board_Task;

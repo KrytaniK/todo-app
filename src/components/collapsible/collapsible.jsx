@@ -1,28 +1,31 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import './collapsible.css';
 
-const C_Collapsible = ({ children, id, isCollapsed }) => {
+const C_Collapsible = ({ children, id, isCollapsed, enableScroll }) => {
+
+    const [isScrolling, setIsScrolling] = useState(false);
 
     const collapsible = useRef(undefined);
-    const oldRect = useRef(undefined);
+    const measure = useRef(undefined);
     
     useEffect(() => {
-        if (!collapsible) return;
+        if (!collapsible || !measure) return;
 
-        if (!oldRect.current) {
-            const el = document.getElementById(id);
-            oldRect.current = el.querySelector('.collapsible-measure').getBoundingClientRect();
-        }
+        const resizeObserver = new ResizeObserver(() => {
+            const measureHeight = parseInt(window.getComputedStyle(measure.current).height);
+            const collapseHeight = parseInt(collapsible.current.style.height);
 
-        const measure = collapsible.current.querySelector('.collapsible-measure');
-        const resizeObserver = new ResizeObserver((entries) => {
-            if (oldRect.current.height !== entries[0].contentRect.height) {
-                collapsible.current.style.height = entries[0].contentRect.height + "px";
-                oldRect.current = entries[0].contentRect;
+            // We are collapsed. No Resize is needed
+            if (collapseHeight === 0)
+                return;
+            
+            if (collapseHeight !== measureHeight) {
+                setIsScrolling(true);
+                collapsible.current.style.height = measureHeight + "px";
             }
         });
 
-        resizeObserver.observe(measure);
+        resizeObserver.observe(measure.current);
 
         return () => {
             resizeObserver.disconnect();
@@ -30,17 +33,21 @@ const C_Collapsible = ({ children, id, isCollapsed }) => {
     }, []);
 
     useEffect(() => {
+
+        setIsScrolling(true);
+
         if (isCollapsed) {
-            collapsible.current.style.height = 0;
+            collapsible.current.style.height = 0 + "px";
             return;
         }
 
-        const measure = collapsible.current.querySelector('.collapsible-measure');
-        collapsible.current.style.height = measure.clientHeight + "px";
-    }, [isCollapsed])
+        if (measure.current)
+            collapsible.current.style.height = window.getComputedStyle(measure.current).height;
 
-    return <div id={id} className="collapsible" ref={collapsible}>
-        <div className="collapsible-measure">
+    }, [isCollapsed]);
+
+    return <div id={id} className="collapsible" ref={collapsible} style={{ overflowY: !isScrolling && enableScroll ? 'auto' : 'hidden' }} onTransitionEnd={() => { setIsScrolling(false); }}>
+        <div className="collapsible-measure" ref={measure}>
             {children}
         </div>
     </div>

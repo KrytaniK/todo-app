@@ -6,9 +6,6 @@
     align-items: center;
     background-color: #1f1f1f;
     box-sizing: border-box;
-    position: sticky;
-    left: 0;
-    top: 0;
 }
 
 .app-name {
@@ -49,6 +46,7 @@
     border-radius: var(--border-radius);
     opacity: 50%;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .selected {

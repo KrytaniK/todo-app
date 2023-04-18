@@ -139,7 +139,6 @@ const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
                 <C_Dropdown title="Add New Status" options={newStatusOptions} alignment="parent-left"/>
                 <C_Dropdown title={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} selected`} options={selectedTaskOptions} alignment="parent-right"/>
             </div>
-
             {
                 project.statuses && project.statuses.map((status) => <C_List_Status
                     key={status.id}

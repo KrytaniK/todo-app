@@ -123,7 +123,7 @@ const C_Sidebar = ({ projects, currentProject }) => {
         <h2 className="app-name">TT-01</h2>
         <nav className="nav-links flex-column">
             <section className="nav-links-category flex-column">
-                <h6 className="nav-links-category-name">PROJECTS</h6>
+                <p className="nav-links-category-name small">PROJECTS</p>
                 <div className="nav-links-category-items flex-column">
                     {
                         projectList.length !== 0 && projectList.map((project, index) => {
@@ -137,7 +137,7 @@ const C_Sidebar = ({ projects, currentProject }) => {
                                     onClick={() => { setSelectedProject(project.id); }}
                                 >
                                     <C_SVG sourceURL="/folder-open.svg" size="1rem" color="var(--color-text)" />
-                                    <h5>{project.name}</h5>
+                                    <p>{project.name}</p>
                                 </Link>
                             </C_ContextMenu>
                         })
@@ -150,7 +150,7 @@ const C_Sidebar = ({ projects, currentProject }) => {
         </nav>
         <button className="add-project flex-row" onClick={() => { setAddingNewProject(true); }}>
             <C_SVG sourceURL="/plus-small.svg" size="1.25rem" color="var(--color-text)" />
-            <h5>New Project</h5>
+            <p>New Project</p>
         </button>
     </section>;
 }

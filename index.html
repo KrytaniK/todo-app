@@ -2,13 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+    <link
+      rel="shortcut icon"
+      href="/favicon-dark.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link
+      rel="shortcut icon"
+      href="/favicon-light.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: light)"
+    />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <meta name="theme-color" content="#171717" />
+    <meta
+      name="description"
+      content="A simple to-do application that keeps track of tasks sorted by project"
+    />
+
+    <title>KrytaniK's Todo App</title>
+
+    <link rel="manifest" href="/manifest.webmanifest" />
   </head>
   <body>
     <div id="portal"></div>
-    <div id="root"></div>
+    <div id="root">Loading Important Data...</div>
     <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>
