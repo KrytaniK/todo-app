@@ -15,14 +15,14 @@ const C_Collapsible = ({ children, id, isCollapsed, enableScroll }) => {
             const measureHeight = parseInt(window.getComputedStyle(measure.current).height);
             const collapseHeight = parseInt(collapsible.current.style.height);
 
-            // We are collapsed. No Resize is needed
             if (collapseHeight === 0)
                 return;
             
             if (collapseHeight !== measureHeight) {
-                setIsScrolling(true);
                 collapsible.current.style.height = measureHeight + "px";
             }
+
+            setIsScrolling(true);
         });
 
         resizeObserver.observe(measure.current);
@@ -46,7 +46,7 @@ const C_Collapsible = ({ children, id, isCollapsed, enableScroll }) => {
 
     }, [isCollapsed]);
 
-    return <div id={id} className="collapsible" ref={collapsible} style={{ overflowY: !isScrolling && enableScroll ? 'auto' : 'hidden' }} onTransitionEnd={() => { setIsScrolling(false); }}>
+    return <div id={id} className="collapsible" ref={collapsible} style={{ overflowY: enableScroll && !isScrolling ? 'auto' : 'hidden' }} onTransitionEnd={() => { setIsScrolling(false); }}>
         <div className="collapsible-measure" ref={measure}>
             {children}
         </div>

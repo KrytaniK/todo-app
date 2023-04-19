@@ -5,8 +5,9 @@ import C_List_NewTaskForm from "./newTaskForm";
 import { Task } from "../../utils/schemas";
 import { useIndexedDB, useModal } from "../../hooks";
 import { getDataFromForm } from "../../utils/util";
+import { Draggable, Droppable } from "react-beautiful-dnd";
 
-const C_List_Status = ({status, statusList, taskList, selectedTasks, saveStatus, removeStatus, addTask, updateTask, removeTask, selectTask, deselectTask }) => {
+const C_List_Status = ({status, index, statusList, tasks, selectedTasks, saveStatus, removeStatus, addTask, updateTask, removeTask, selectTask, deselectTask }) => {
 
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
@@ -46,45 +47,66 @@ const C_List_Status = ({status, statusList, taskList, selectedTasks, saveStatus,
         }
     ]
 
-    return <section className="project-status">
-        <C_ContextMenu options={statusModalOptions}>
-            <div className="project-status-header flex-row">
-                <button aria-label="Status Expand Button" className={`expandStatusBtn ${isCollapsed ? 'collapsed' : ''}`} onClick={() => { setIsCollapsed(!isCollapsed); }} >
-                    <C_SVG sourceURL="/chevron-up.svg" size="1rem" color="var(--color-text)"/>
-                </button>
-                <div className="project-list-status-name" style={{ color: status.color }}>{status.name}</div>
-
-                {
-                    isCollapsed ? <p className="project-status-taskCount small">{taskList.length} task{taskList.length === 1 ? '' : 's'}</p> :
-                        <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
-                            <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
-                            <p className="small">New Task</p>
+    return <Draggable draggableId={status.id} index={index}>
+        {(provided) => {
+            return <section
+                className="project-status"
+                {...provided.draggableProps}
+                ref={provided.innerRef}
+            >
+                <C_ContextMenu options={statusModalOptions}>
+                    <div className="project-status-header flex-row" {...provided.dragHandleProps}>
+                        <button aria-label="Status Expand Button" className={`expandStatusBtn ${isCollapsed ? 'collapsed' : ''}`} onClick={() => { setIsCollapsed(!isCollapsed); }} >
+                            <C_SVG sourceURL="/chevron-up.svg" size="1rem" color="var(--color-text)"/>
                         </button>
-                }
-            </div>
-        </C_ContextMenu>
-        <C_Collapsible id={status.id} isCollapsed={isCollapsed}>
-            <ul className="project-status-items flex-column">
-                
-                {isAddingTask && <C_List_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }} />}
-                
-                {taskList && taskList.map(task => {
-                    return <C_List_Task
-                        key={task.id}
-                        statusList={statusList}
-                        task={task}
-                        color={status.color}
-                        selected={selectedTasks.includes(task.id)}
-                        updateTask={updateTask}
-                        removeTask={removeTask}
-                        selectTask={selectTask}
-                        deselectTask={deselectTask}
-                    />;
-                })}
-            </ul>
-        </C_Collapsible>
-        <C_StatusModal status={status} control={statusModalControl} onSave={onSaveStatus} />
-    </section>
+                        <div className="project-list-status-name" style={{ color: status.color }}>{status.name}</div>
+
+                        {
+                            isCollapsed ? <p className="project-status-taskCount small">{status.taskIDs.length} task{status.taskIDs.length === 1 ? '' : 's'}</p> :
+                                <button className="newTaskBtn flex-row" onClick={() => { setIsAddingTask(true); }}>
+                                    <C_SVG sourceURL="/plus-small.svg" size="1rem" color="var(--color-text)" />
+                                    <p className="small">New Task</p>
+                                </button>
+                        }
+                    </div>
+                </C_ContextMenu>
+                <Droppable droppableId={status.id} type="task">
+                    {(provided, snapshot) => {
+                        return <C_Collapsible id={status.id} isCollapsed={isCollapsed}>
+                            <ul
+                                className="project-status-items flex-column"
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                style={snapshot.isDraggingOver ? { backgroundColor: "#373737" } : {}}
+                            >
+                                
+                                {isAddingTask && <C_List_NewTaskForm onSubmit={addTaskToStatus} onCancel={() => { setIsAddingTask(false); }} />}
+                                
+                                {
+                                    status.taskIDs.map((taskID, index) => {
+                                        return <C_List_Task
+                                            key={taskID}
+                                            statusList={statusList}
+                                            task={tasks[taskID]}
+                                            index={index}
+                                            color={status.color}
+                                            selected={selectedTasks.includes(taskID)}
+                                            updateTask={updateTask}
+                                            removeTask={removeTask}
+                                            selectTask={selectTask}
+                                            deselectTask={deselectTask}
+                                        />;
+                                    })
+                                }
+                                {provided.placeholder}
+                            </ul>
+                        </C_Collapsible>
+                    }}
+                </Droppable>
+                <C_StatusModal status={status} control={statusModalControl} onSave={onSaveStatus} />
+            </section>
+        }}
+    </Draggable>
 }
 
 export default C_List_Status;

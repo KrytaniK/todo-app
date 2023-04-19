@@ -41,9 +41,17 @@ const C_Sidebar = ({ projects, currentProject }) => {
         const newName = data["newProjectName"] || "New Project";
 
         db.getAll('statuses').then(statuses => {
+
+            const newProjectStatuses = {};
+            const newProjectStatusArray = statuses.filter(status => status.isTemplate);
+            for (let status of newProjectStatusArray) {
+                newProjectStatuses[status.id] = status;
+            }
+
+            
             const newProject = new Project({
                 name: newName,
-                statuses: statuses.filter(status => status.isTemplate)
+                statuses: newProjectStatuses
             });
 
             db.add('projects', newProject).then(() => {

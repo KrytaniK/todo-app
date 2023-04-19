@@ -31,10 +31,10 @@ export const router = createBrowserRouter([
                         return redirect('/');
                     }
 
-                    const filledTasks = [];
+                    const filledTasks = {};
                     for (let taskID of project.tasks) {
                         const task = await db.store('tasks').get(taskID);
-                        filledTasks.push(task);
+                        filledTasks[taskID] = task;
                     }
 
                     const statuses = await db.store('statuses').getAll();

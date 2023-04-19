@@ -5,8 +5,9 @@ import { ContextMenuItem } from "../../utils/schemas";
 import C_List_NewTaskForm from "./newTaskForm";
 import { getDataFromForm } from "../../utils/util";
 import { useIndexedDB } from "../../hooks";
+import { Draggable } from "react-beautiful-dnd";
 
-const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask, selectTask, deselectTask }) => {
+const C_List_Task = ({ statusList, task, index, color, selected, updateTask, removeTask, selectTask, deselectTask }) => {
 
     const [isRenaming, setIsRenaming] = useState(false);
     
@@ -73,20 +74,28 @@ const C_List_Task = ({ statusList, task, color, selected, updateTask, removeTask
 
     if (isRenaming) return <C_List_NewTaskForm placeholderText={task.name} onSubmit={onRenameTask} onCancel={() => { setIsRenaming(false); }} />;
 
-    return task && <li>
-        <C_ContextMenu options={taskContextOptions}>
-            <div className="project-listTask flex-row" onClick={onSelectTask}>
-                <div
-                    className="project-task-selector"
-                    style={{ border: selected && `2px solid ${color}`, backgroundColor: selected && color }}
-                />
-                <p>{task.name}</p>
-                <div className="project-listTask-info flex-row">
-                </div>
-            </div>
-        </C_ContextMenu>
-        <C_TaskModal control={_modal} task={task} statusList={statusList} onSave={updateTask} />
-    </li>;
+    return task && <Draggable draggableId={task.id} index={index}>
+        {(provided, snapshot) => {
+            return <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                <C_ContextMenu options={taskContextOptions}>
+                    <div
+                        className="project-listTask flex-row"
+                        onClick={onSelectTask}
+                        style={{opacity: snapshot.isDragging ? '75%' : '100%'}}
+                    >
+                        <div
+                            className="project-task-selector"
+                            style={{ border: selected && `2px solid ${color}`, backgroundColor: selected && color }}
+                        />
+                        <p>{task.name}</p>
+                        <div className="project-listTask-info flex-row">
+                        </div>
+                    </div>
+                </C_ContextMenu>
+                <C_TaskModal control={_modal} task={task} statusList={statusList} onSave={updateTask} />
+            </li>
+        }}
+    </Draggable>;
 }
 
 export default C_List_Task;

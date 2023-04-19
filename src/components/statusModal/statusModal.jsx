@@ -26,7 +26,7 @@ const C_StatusModal = ({ control, status, onSave }) => {
         const newStatus = {
             ...status,
             name: newStatusName,
-            color: newStatusColor
+            color: newStatusColor,
         }
 
         db.update('statuses', newStatus).then(() => {

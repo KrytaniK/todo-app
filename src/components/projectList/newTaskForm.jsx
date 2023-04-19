@@ -1,7 +1,7 @@
 import React from "react";
 import { C_SVG } from '../';
 
-const C_List_NewTaskForm = ({onSubmit, onCancel, placeholderText}) => {
+const C_List_NewTaskForm = ({ onSubmit, onCancel, placeholderText }) => {
     return <form className="project-listTask-new flex-row" onSubmit={onSubmit}>
         <button type="button" onClick={onCancel}>
             <C_SVG sourceURL="/x.svg" size="1rem" color="var(--color-text)" />

@@ -14,12 +14,14 @@ const C_Menu = ({ isOpen, options, pos, onSelectItem, alignment, isSubMenu }) =>
         switch (alignment) {
             case 'parent-left': {
                 menuRef.current.style.left = '0px';
-                menuRef.current.style.top = '100%';
+                if (!isSubMenu)
+                    menuRef.current.style.top = '100%';
                 break;
             }
             case 'parent-right': {
                 menuRef.current.style.right = '0px';
-                menuRef.current.style.top = '100%';
+                if (!isSubMenu)
+                    menuRef.current.style.top = '100%';
                 break;
             }
             case 'left': {

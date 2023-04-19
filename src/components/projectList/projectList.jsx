@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import C_List_Status from "./listStatus";
-import './projectList.css';
 import C_Dropdown from "../dropdown/dropdown";
 import { useIndexedDB, useModal } from "../../hooks";
 import C_StatusModal from "../statusModal/statusModal";
+import './projectList.css';
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
 
@@ -13,42 +14,97 @@ const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
     const newStatusModal = useModal();
 
     const addStatus = (status) => {
-        onProjectUpdate({ statuses: [...project.statuses, status] });
+        const newStatuses = { ...project.statuses };
+
+
+        let statusTaskIDs = [];
+        if (project.hasOwnProperty('cachedStatusTaskIDs') && project.cachedStatusTaskIDs[status.id]) {
+            statusTaskIDs = project.cachedStatusTaskIDs[status.id];
+        }
+
+        newStatuses[status.id] = { ...status, taskIDs: statusTaskIDs };
+        
+        onProjectUpdate({ statuses: newStatuses, statusOrder: [...project.statusOrder, status.id] });
     }
 
     const saveStatus = (status) => {
-        const newStatuses = [...project.statuses];
-        for (let i = 0; i < newStatuses.length; i++) {
-            if (newStatuses[i].id === status.id) {
-                newStatuses.splice(i, 1, status);
+        const newStatuses = { ...project.statuses };
+        newStatuses[status.id] = status;
+
+        onProjectUpdate({ statuses: newStatuses });
+    }
+
+    const removeStatus = (status) => {
+        const newStatuses = { ...project.statuses };
+        delete newStatuses[status.id];
+
+        const newStatusOrder = project.statusOrder.filter(id => id !== status.id);
+
+        const cachedStatuses = {};
+        if (project.hasOwnProperty('cachedStatusTaskIDs')) {
+            cachedStatusTaskOrder = { ...project.cachedStatusTaskIDs };
+        }
+
+         cachedStatuses[status.id] = status.taskIDs;
+
+        onProjectUpdate({ statuses: newStatuses, statusOrder: newStatusOrder, cachedStatusTaskIDs: cachedStatuses });
+    }
+
+    const addTask = (task) => {
+        const newProjectTasks = { ...project.tasks };
+        newProjectTasks[task.id] = task;
+
+        const taskStatus = project.statuses[task.status];
+        const updatedStatus = { ...taskStatus, taskIDs: [...taskStatus.taskIDs, task.id] };
+
+        onProjectUpdate({ tasks: newProjectTasks, statuses: {...project.statuses, [updatedStatus.id]: updatedStatus} });
+    }
+
+    const updateTask = (task) => {
+        const newProjectTasks = { ...project.tasks };
+
+        const oldTask = { ...newProjectTasks[task.id] };
+
+        newProjectTasks[task.id] = task;
+
+        for (let i = 0; i < selectedTasks.length; i++) {
+            if (selectedTasks[i].id === task.id) {
+                selectedTasks.splice(i, 1);
+                setSelectedTasks([...selectedTasks]);
                 break;
             }
         }
 
-        onProjectUpdate({ statuses: [...newStatuses] });
-    }
+        if (oldTask.status === task.status) {
+            onProjectUpdate({ tasks: newProjectTasks });
+            return;
+        }
 
-    const removeStatus = (status) => {
-        onProjectUpdate({ statuses: project.statuses.filter(_status => _status.id !== status.id) });
-    }
+        const oldStatus = project.statuses[oldTask.status];
+        const newStatus = project.statuses[task.status];
 
-    const addTask = (task) => {
-        onProjectUpdate({ tasks: [...project.tasks, task] });
-    }
+        const updatedOldStatus = { ...oldStatus, taskIDs: oldStatus.taskIDs.filter(id => task.id !== id) };
+        const updatedNewStatus = { ...newStatus, taskIDs: [...newStatus.taskIDs, task.id] };
 
-    const updateTask = (task) => {
         onProjectUpdate({
-            tasks: project.tasks.map(_task => {
-                if (_task.id === task.id)
-                return task;
-                
-                return _task;
-            })
+            tasks: newProjectTasks,
+            statuses: {
+                ...project.statuses,
+                [updatedOldStatus.id]: updatedOldStatus,
+                [updatedNewStatus.id]: updatedNewStatus
+            }
         });
+        return;
     }
 
     const removeTask = (task) => {
-        onProjectUpdate({ tasks: project.tasks.filter(_task => _task.id !== task.id) });
+        const newProjectTasks = { ...project.tasks };
+        delete newProjectTasks[task.id];
+
+        const taskStatus = project.statuses[task.status];
+        const updatedStatus = { ...taskStatus, taskIDs: taskStatus.taskIDs.filter(id => task.id !== id) };
+
+        onProjectUpdate({ tasks: newProjectTasks, statuses: {...project.statuses, [taskStatus.id]: updatedStatus} });
     }
 
     const selectTask = (task) => { 
@@ -66,18 +122,37 @@ const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
 
     const moveSelectedTasksToStatus = (newStatus) => {
 
-        const newProjectTasks = [...project.tasks];
+        const updatedStatuses = { ...project.statuses };
+        const updatedTasks = { ...project.tasks };
+        const dbTasks = [];
+
         for (let task of selectedTasks) {
-            for (let i = 0; i < newProjectTasks.length; i++) {
-                if (newProjectTasks[i].id === task.id) {
-                    newProjectTasks.splice(i, 1, { ...task, status: newStatus });
-                    break;
-                }
-            }
+            if (task.status === newStatus) continue;
+
+            // Remove Task From Old Status
+            const oldStatus = updatedStatuses[task.status];
+            const oldStatusTasks = oldStatus.taskIDs;
+            const index = oldStatusTasks.indexOf(task.id);
+            oldStatusTasks.splice(index, 1);
+
+            // Update Statuses Object
+            updatedStatuses[task.status] = { ...oldStatus, taskIDs: [...oldStatusTasks] };
+
+            // Add the task to the new Status
+            const _newStatus = updatedStatuses[newStatus];
+            const newStatusTasks = _newStatus.taskIDs;
+            newStatusTasks.push(task.id);
+
+            // Update statuses object
+            updatedStatuses[newStatus] = { ..._newStatus, taskIDs: newStatusTasks };
+
+            const updatedTask = { ...task, status: newStatus };
+            dbTasks.push(updatedTask)
+            updatedTasks[task.id] = updatedTask;
         }
 
-        db.updateMany('tasks', newProjectTasks).then(() => {
-            onProjectUpdate({ tasks: newProjectTasks });
+        db.updateMany('tasks', dbTasks).then(() => {
+            onProjectUpdate({ tasks: updatedTasks, statuses: { ...updatedStatuses } });
             setSelectedTasks([]);
         });
     }
@@ -95,7 +170,7 @@ const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
     }
 
     const newStatusOptions = [
-        ...statuses.map(status => {
+        ...statuses.filter(status => !project.statuses.hasOwnProperty(status.id)).map(status => {
             return {
                 id: `new-status-${status.id}`,
                 title: status.name,
@@ -116,12 +191,12 @@ const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
             id: 'selected-moveto',
             title: 'Move To',
             color: 'var(--color-text)',
-            options: project.statuses.map(status => {
+            options: project.statusOrder.map(statusID => {
                 return {
-                    id: 'selected-moveto' + status.id,
-                    title: status.name,
+                    id: 'selected-moveto' + statusID,
+                    title: project.statuses[statusID].name,
                     color: 'var(--color-text)',
-                    callback: () => { moveSelectedTasksToStatus(status.id); }
+                    callback: () => { moveSelectedTasksToStatus(statusID); }
                 }
             })
         },
@@ -133,28 +208,106 @@ const C_ProjectList = ({ project, statuses, onProjectUpdate }) => {
         }
     ]
 
+    // Drag and Drop
+    const onDragEnd = (result) => {
+        const { source, destination, draggableId, type } = result;
+
+        if (!destination)
+            return;
+        
+        if (source.index === destination.index &&
+            source.droppableId === destination.droppableId)
+            return;
+        
+        switch (type) {
+            case "task":
+                 // Moving within the same status
+                if (source.droppableId === destination.droppableId) {
+                    const status = project.statuses[source.droppableId];
+                    const newTaskIDs = [...status.taskIDs];
+
+                    newTaskIDs.splice(source.index, 1);
+                    newTaskIDs.splice(destination.index, 0, draggableId);
+
+                    const newStatus = {
+                        ...status,
+                        taskIDs: newTaskIDs
+                    }
+
+                    onProjectUpdate({ statuses: { ...project.statuses, [status.id]: newStatus } });
+                    return;
+                }
+
+                // Moving to another status
+                const sourceStatus = project.statuses[source.droppableId];
+                const newSourceTaskIDs = [...sourceStatus.taskIDs];
+                const destinationStatus = project.statuses[destination.droppableId];
+                const newDestinationTaskIDs = [...destinationStatus.taskIDs];
+
+                newSourceTaskIDs.splice(source.index, 1);
+                newDestinationTaskIDs.splice(destination.index, 0, draggableId);
+
+                const newSourceStatus = {
+                    ...sourceStatus,
+                    taskIDs: newSourceTaskIDs
+                }
+
+                const newDestinationStatus = {
+                    ...destinationStatus,
+                    taskIDs: newDestinationTaskIDs
+                }
+
+                onProjectUpdate({
+                    statuses: {
+                        ...project.statuses,
+                        [sourceStatus.id]: newSourceStatus,
+                        [destinationStatus.id]: newDestinationStatus
+                    }
+                })
+                break;
+            case "status":
+                const statusOrder = [...project.statusOrder];
+                statusOrder.splice(source.index, 1);
+                statusOrder.splice(destination.index, 0, draggableId);
+                onProjectUpdate({statusOrder: [...statusOrder]})
+                break;
+        }
+    }
+
     return <>
         <section className="project-list-view flex-column">
             <div className="project-list-header flex-row">
                 <C_Dropdown title="Add New Status" options={newStatusOptions} alignment="parent-left"/>
                 <C_Dropdown title={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} selected`} options={selectedTaskOptions} alignment="parent-right"/>
             </div>
-            {
-                project.statuses && project.statuses.map((status) => <C_List_Status
-                    key={status.id}
-                    status={status}
-                    statusList={project.statuses}
-                    taskList={project.tasks.filter((task) => task.status === status.id)}
-                    selectedTasks={selectedTasks.map(({ id }) => id)}
-                    saveStatus={saveStatus}
-                    removeStatus={removeStatus}
-                    addTask={addTask}
-                    updateTask={updateTask}
-                    removeTask={removeTask}
-                    selectTask={selectTask}
-                    deselectTask={deselectTask}
-                />)
-            }
+            <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="project-statuses" direction="vertical" type="status">
+                    {(provided) => {
+                        return <div className="project-list-statuses flex-column" {...provided.droppableProps} ref={provided.innerRef}>
+                            {
+                                project.statusOrder.map((statusID, index) => {
+                                    return <C_List_Status
+                                        key={statusID}
+                                        status={project.statuses[statusID]}
+                                        index={index}
+                                        statusList={Object.values(project.statuses)}
+                                        tasks={project.tasks}
+                                        selectedTasks={selectedTasks.map(({ id }) => id)}
+                                        saveStatus={saveStatus}
+                                        removeStatus={removeStatus}
+                                        addTask={addTask}
+                                        updateTask={updateTask}
+                                        removeTask={removeTask}
+                                        selectTask={selectTask}
+                                        deselectTask={deselectTask}
+                                    />
+                                })
+                            }
+                            {provided.placeholder}
+                        </div>
+                    }}
+                </Droppable>
+            </DragDropContext>
         </section>
         <C_StatusModal control={newStatusModal} onSave={addStatus} />
     </>;

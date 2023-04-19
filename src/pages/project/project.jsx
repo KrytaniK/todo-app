@@ -34,22 +34,30 @@ const P_Project = () => {
     const onProjectUpdate = (updatedData) => {
 
         const newProjectData = { ...projectData, ...updatedData };
-        const newTaskIDList = newProjectData.tasks.map(task => task.id);
+        const newTaskIDList = Object.keys(newProjectData.tasks);
 
-        const newStatuses = newProjectData.statuses.filter(status => {
+        // Discern any statuses that were added to the app
+        const addedStatuses = {};
+        Object.entries(newProjectData.statuses).map(([id, status]) => {
             for (let _status of statusList) {
-                if (_status.id === status.id) return false;
+                if (_status.id == id)
+                    return;
             }
 
-            return true;
+            addedStatuses[id] = status;
         });
+
+        const newStatusList = {};
+        for (let status of statusList) {
+            newStatusList[status.id] = status;
+        }
 
         db.update('projects', {
             ...newProjectData,
             tasks: [...newTaskIDList]
         }).then(() => {
             setProjectData(newProjectData);
-            setStatusList([...statusList, ...newStatuses]);
+            setStatusList(Object.values({...newStatusList, ...addedStatuses, ...newProjectData.statuses}));
         });
     }
 
@@ -70,25 +78,17 @@ const P_Project = () => {
         {
             view === 'List' && <C_ProjectList
                 project={projectData}
-                statuses={statusList.filter(status => {
-                    for (let _status of projectData.statuses) {
-                        if (_status.id === status.id) return false;
-                    }
-                    return true;
-                })} 
+                statuses={statusList}
+                statusOrder={projectData.statusOrder}
                 onProjectUpdate={onProjectUpdate}
             />
         }
         {
             view === 'Board' && <C_ProjectBoard
                 project={projectData}
-                statuses={statusList.filter(status => {
-                    for (let _status of projectData.statuses) {
-                        if (_status.id === status.id) return false;
-                    }
-                    return true;
-                })}
+                statuses={statusList}
                 onProjectUpdate={onProjectUpdate}
+                statusOrder={projectData.statusOrder}
             />
         }
     </div>;

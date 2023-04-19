@@ -61,13 +61,10 @@
 
 .project-status-items {
     overflow: hidden;
-    min-height: 2rem;
+    min-height: 32px;
     gap: 8px;
-}
-
-.project-status-items:empty {
-    padding: 0;
-    min-height: 0px;
+    padding: 16px;
+    border-radius: var(--border-radius);
 }
 
 .expandStatusBtn, .newTaskBtn {

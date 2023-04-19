@@ -1,10 +1,10 @@
 import * as short from 'short-uuid';
 
 export class Project {
-    constructor(options) {
+    constructor(options = { name: "New Project", statuses: {} }) {
         this.id = short.generate();
         this.name = options.name;
-        this.statuses = options.statuses || [];
+        this.statuses = options.statuses;
         this.statusOrder = options.statusOrder || [];
         this.tasks = options.tasks || [];
     }
