@@ -266,7 +266,7 @@ const C_ProjectBoard = ({ project, statuses, onProjectUpdate }) => {
         }
     }
 
-    return <section className="project-board-view flex-column">
+    return <section className="project-board-view flex-column" >
         <div className="project-board-header flex-row">
             <C_Dropdown title="Add New Status" options={newStatusOptions} alignment="parent-left"/>
             <C_Dropdown title={`${selectedTasks.length} task${selectedTasks.length !== 1 ? 's' : ''} selected`} options={selectedTaskOptions} alignment="parent-right"/>
