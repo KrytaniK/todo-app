@@ -52,4 +52,6 @@ export const router = createBrowserRouter([
         element: null,
         loader: async () => redirect('/')
     }
-])
+], {
+    basename: '/todo-app'
+})

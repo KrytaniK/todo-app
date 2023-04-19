@@ -7,7 +7,7 @@ const C_SVG = ({ className, sourceURL, color, size }) => {
     return <div
         className={`${className || ""} svg`}
         style={{
-            WebkitMask: `url(${sourceURL})`,
+            WebkitMask: `url(${import.meta.env.BASE_URL}${sourceURL})`,
             WebkitMaskSize: 'cover',
             WebkitMaskPosition: 'center',
             WebkitMaskRepeat: 'no-repeat',
