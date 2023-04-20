@@ -1,10 +1,18 @@
 import React from "react";
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createHashRouter, redirect } from "react-router-dom";
 import App from './App';
 import { P_Project } from "./pages";
 import Database from './utils/indexedDB';
 
-export const router = createBrowserRouter([
+/*
+    NOTE:
+        Github pages doesn't natively support SPA's (Single Page Apps), meaning React Router's 'BrowserRouter' won't work in deployment. 
+        A common workaroud seems to be replacing the BrowserRouter with a HashRouter. This does resolve the issue, however, at the cost 
+        of a not-so-appealing URL. For the scope of this project, this solution works, however, under a hosted domain and a more complex
+        and/or publicized app, a more integrated solution will be required.
+*/
+
+export const router = createHashRouter([
     {
         id: 'app',
         path: '/',
@@ -52,6 +60,4 @@ export const router = createBrowserRouter([
         element: null,
         loader: async () => redirect('/')
     }
-], {
-    basename: '/todo-app'
-})
+])
